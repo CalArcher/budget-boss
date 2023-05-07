@@ -1,0 +1,2 @@
+class TextRecieve < ApplicationRecord
+end

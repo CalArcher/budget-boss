@@ -1,0 +1,2 @@
+class TextSend < ApplicationRecord
+end
