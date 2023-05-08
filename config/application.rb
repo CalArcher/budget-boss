@@ -13,7 +13,6 @@ module BudgetBoss
 
     # Load dotenv configuration files in all environments
     Dotenv::Railtie.load
-    puts 'hello'
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

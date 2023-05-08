@@ -9,13 +9,13 @@ gem "rails", "~> 7.0.4", ">= 7.0.4.3"
 # Use postgresql as the database for Active Record
 gem 'pg', '>= 1.2.0'
 
+gem 'dotenv-rails'
+
 gem 'pry'
 
 gem 'activerecord'
 
 gem 'twilio-ruby', '~> 5.77.0'
-
-gem 'dotenv-rails', groups: [:development, :test]
 
 gem 'sinatra'
 
