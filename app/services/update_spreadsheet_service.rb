@@ -103,7 +103,7 @@ class UpdateSpreadsheetService
       )
     rescue StandardError => e
       error_message = "Failed up update balance, error: #{e.message}"
-      OutgoingSmsService.new(to_user_id: @user_id, body: error_message, @user_id).send
+      OutgoingSmsService.new(to_user_id: @user_id, body: error_message).send
     end
     message = "Balance updated, #{next_month}/#{update_year} is now #{new_income}"
     OutgoingSmsService.new(to_user_id: @user_id, body: message).send
