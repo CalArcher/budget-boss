@@ -17,6 +17,10 @@ class IncomingSmsService
     from_user_id != 0
   end
 
+  # a command is three words long (besides exeptions)
+  # either delete, update, create, for first word
+  # bill name in snake case
+  # third word is the new amount
   def commands
     update_commands = all_bill_names.map do |name|
       "update #{name}"
@@ -36,6 +40,7 @@ class IncomingSmsService
       'sabrina spent',
       'together spent',
       'list commands',
+      'list bills'
     ].concat(update_commands, create_command)
   end
 
@@ -44,32 +49,46 @@ class IncomingSmsService
   end
 
   def parse_body
-    pieces = @body.split(' ')
-    if pieces.size >= 2
-      command = "#{pieces[0]} #{pieces[1]}"
+    chunks = @body.split(' ')
+    command = nil
+    amount = nil
+    prefix = nil
+    bill_name = nil
+
+    if chunks.size == 2
+      command = "#{chunks[0]} #{chunks[1]}"
+    elsif chunks.size == 3
+      prefix = chunks[0]
+      bill_name = chunks[1]
+      amount = chunks[2].to_f
     end
-    if pieces.size >= 3
-      amount = pieces[2].to_f
-    end
-    { command: command, amount: amount }
+
+    { 
+      command: command,
+      amount: amount,
+      prefix: prefix,
+      bill_name: bill_name
+    }
   end
+
+  
 
   def body_correct_length?
     peices = @body.split(' ')
     peices.length == 2 || peices.length == 3
   end
 
-  def is_good_command?
+  def command_recognized?
     first_two = @body.split(' ').take(2).join(' ')
     commands.include?(first_two)
   end
 
 
   def command_valid?
-    if is_good_command? && body_correct_length?
+    if command_recognized? && body_correct_length?
       true
     else
-      error_message = "#{@body} is an invalid command. Reply \"List commands\" to show valid commands"
+      error_message = "\"#{@body}\" is an invalid command. Reply \"List commands\" to show valid commands"
       OutgoingSmsService.new(to_user_id: from_user_id, body: error_message)
     end
   end
@@ -79,13 +98,13 @@ class IncomingSmsService
     return unless recognized_user?
     return unless command_valid?
 
-    command = parse_body[:command]
-    amount = parse_body[:amount]
-    if amount
-      call_command_function(command, amount)
-    else
-      call_command_function(command)
-    end
+    # command = parse_body[:command]
+    # amount = parse_body[:amount]
+    # if amount
+    #   call_command_function(command, amount)
+    # else
+    #   call_command_function(command)
+    # end
 
   end
 

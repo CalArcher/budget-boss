@@ -109,3 +109,19 @@ class UpdateSpreadsheetService
     OutgoingSmsService.new(to_user_id: @user_id, body: message).send
   end
 end
+
+# Transaction.create!(
+#     "tx_name": "POSTMAN",
+#     "tx_type": "lll",
+#     "tx_amount": 500,
+#     "user_id": 0,
+#     "tx_currency": "USD"
+# )
+
+# {
+#   "tx_name": "POSTMAN",
+#   "tx_type": "lll",
+#   "tx_amount": 500,
+#   "user_id": 0,
+#   "tx_currency": "USD"
+# }
