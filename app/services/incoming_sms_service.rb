@@ -5,6 +5,14 @@ class IncomingSmsService
     @from_number = from_number.to_s
   end
 
+  def year
+    @_year ||= Time.now.year
+  end
+
+  def month
+    @_month ||= Time.now.month
+  end
+
   def from_user_id
     user_id_map = {
       ENV['1'] => '1',
@@ -25,7 +33,7 @@ class IncomingSmsService
     update_commands = all_bill_names.map do |name|
       "update #{name}"
     end
-    second_string = @body.split(' ')[1]
+    second_string = body_array[1]
     create_command = []
     if second_string.match?(/\D/)
       create_command = ["create #{second_string}"]
@@ -40,7 +48,7 @@ class IncomingSmsService
       'sabrina spent',
       'together spent',
       'list commands',
-      'list bills'
+      'list bills',
     ].concat(update_commands, create_command)
   end
 
@@ -48,8 +56,12 @@ class IncomingSmsService
     @_all_bill_name ||= Bill.bill_names
   end
 
+  def body_array
+    @_body_array ||= @body.split(' ')
+  end
+
   def parse_body
-    chunks = @body.split(' ')
+    chunks = body_array
     command = nil
     amount = nil
     prefix = nil
@@ -71,18 +83,14 @@ class IncomingSmsService
     }
   end
 
-  
-
   def body_correct_length?
-    peices = @body.split(' ')
-    peices.length == 2 || peices.length == 3
+    body_array.length == 2 || body_array.length == 3
   end
 
   def command_recognized?
-    first_two = @body.split(' ').take(2).join(' ')
+    first_two = body_array.take(2).join(' ')
     commands.include?(first_two)
   end
-
 
   def command_valid?
     if command_recognized? && body_correct_length?
@@ -93,19 +101,47 @@ class IncomingSmsService
     end
   end
 
+  def two_word_command
+    case parse_body[:command]
+    when 'list bills'
+      # list_bills
+    when 'list commands'
+      # list_commands
+    when 'cal status'
+      get_status('user_1', "Cal's")
+    when 'sabrina status'
+      get_status('user_2', "Sabrina's")
+    when 'together status'
+      get_status('together', 'Together')
+    end
+  end
+
+  def call_user_requested_service
+    if body_array.length == 2
+      two_word_command
+    elsif body_array.length == 3
+      # three_word_command
+    end
+  end
+
 
   def handle_reply
     return unless recognized_user?
     return unless command_valid?
+    call_user_requested_service
+  end
 
-    # command = parse_body[:command]
-    # amount = parse_body[:amount]
-    # if amount
-    #   call_command_function(command, amount)
-    # else
-    #   call_command_function(command)
-    # end
+  def get_status(user, name)
+    user_budget_column = "#{user}_budget" # column name to query
+    user_spent_column = "#{user}_spent" # column name to query
 
+    sheet = Sheet.where(month: month, year: year)
+
+    user_spent = sheet.pluck(user_spent_column).first
+    user_budget = sheet.pluck(user_budget_column).first
+
+    reply = "#{name} budget remaining this month: $#{user_budget}. Total spent this month: $#{user_spent}"
+    OutgoingSmsService.new(to_user_id: from_user_id, body: reply)
   end
 
   def create_bill(amount)
