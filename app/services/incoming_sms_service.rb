@@ -25,18 +25,23 @@ class IncomingSmsService
     from_user_id != 0
   end
 
-  # a command is three words long (besides exeptions)
-  # either delete, update, create, for first word
+  # a command is either two or three words
+  # three word commands are always data update commands
+  # two word commands are always data request commands
+
+  # data update commads first words are either update, create, for first word
   # bill name in snake case
   # third word is the new amount
+
+  #ex: "updte bill_name 100"
   def commands
     update_commands = all_bill_names.map do |name|
       "update #{name}"
     end
-    second_string = body_array[1]
+    bill_name = body_array[1]
     create_command = []
-    if second_string.match?(/\D/)
-      create_command = ["create #{second_string}"]
+    if bill_name.match?(/\D/) && !all_bill_names.include?(bill_name)
+      create_command = ["create #{bill_name}"]
     end
 
     standard_commands = [
@@ -74,7 +79,6 @@ class IncomingSmsService
       bill_name = chunks[1]
       amount = chunks[2].to_f
     end
-
     { 
       command: command,
       amount: amount,
@@ -88,8 +92,10 @@ class IncomingSmsService
   end
 
   def command_recognized?
-    first_two = body_array.take(2).join(' ')
-    commands.include?(first_two)
+    body_length = body_array.length
+    first_two = body_array.take(2).join(' ') 
+    return false unless commands.include?(first_two)
+    body_array.length == 2 || body_array[2] =~ /^\d+$/
   end
 
   def command_valid?
@@ -101,12 +107,12 @@ class IncomingSmsService
     end
   end
 
-  def two_word_command
+  def handle_info_request_command
     case parse_body[:command]
     when 'list bills'
-      # list_bills
+      # list('bills')
     when 'list commands'
-      # list_commands
+      # list('commands')
     when 'cal status'
       get_status('user_1', "Cal's")
     when 'sabrina status'
@@ -116,14 +122,19 @@ class IncomingSmsService
     end
   end
 
+  # def handle_data_update_command
+  # end
+
+  # def list(data)
+  # end
+
   def call_user_requested_service
     if body_array.length == 2
-      two_word_command
+      handle_info_request_command
     elsif body_array.length == 3
-      # three_word_command
+      # handle_data_update_command
     end
   end
-
 
   def handle_reply
     return unless recognized_user?
