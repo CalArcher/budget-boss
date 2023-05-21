@@ -180,7 +180,7 @@ class IncomingSmsService
       handle_info_request_command
     elsif parse_body[:prefix] == 'create' || parse_body[:prefix] == 'update'
       create_update_bill(name: parse_body[:middle], amount: parse_body[:amount], type: parse_body[:prefix])
-    elsif parse_body:[middle] == 'payday'
+    elsif parse_body[:middle] == 'payday'
       process_payday
     # elsif
       # handle parse[:middle] == spent commands
