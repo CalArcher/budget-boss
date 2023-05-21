@@ -59,7 +59,7 @@ class IncomingSmsService
   end
 
   def all_bill_names
-    @_all_bill_name ||= Bill.all_bill_names.join(' ')
+    @_all_bill_name ||= Bill.bill_names.join(' ')
   end
 
   def body_array
