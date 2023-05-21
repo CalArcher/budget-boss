@@ -1,4 +1,4 @@
-class UpdateSpreadsheetService
+class UpdateDbService
 
   def initialize(user_id:, amount:, bill_name:)
     @user_id = user_id
@@ -34,13 +34,13 @@ class UpdateSpreadsheetService
     end
   end
 
-  def create_bill(name, amount)
+  def create_bill
     begin
       Bill.create!(
-        bill_name: name,
-        bill_amount: amount,
+        bill_name: @bill_name,
+        bill_amount: @amount,
       )
-      message = "Created new bill: #{name} at #{amount} per month"
+      message = "Created new bill: #{@bill_name} at #{@amount} per month"
       OutgoingSmsService.new(to_user_id: @user_id, body: message).send
     rescue StandardError => e
       error_message = "Failed to update bill. Error: #{e.message}"
@@ -48,14 +48,14 @@ class UpdateSpreadsheetService
     end
   end
 
-  def update_bill(name, amount)
+  def update_bill
     begin
-      bill = Bill.find_by(bill_name: name)
+      bill = Bill.find_by(bill_name: @bill_name)
       previous_amount = bill.bill_amount
       bill.update!(
-        bill_amount: amount,
+        bill_amount: @amount,
       )
-      message = "#{name} bill updated from #{previous_amount} to #{amount} per month"
+      message = "#{@bill_name} bill updated from #{previous_amount} to #{@amount} per month"
       OutgoingSmsService.new(to_user_id: @user_id, body: message).send
     rescue StandardError => e
       error_message = "Failed up update bill. Error: #{e.message}"
@@ -68,8 +68,9 @@ class UpdateSpreadsheetService
     current_sheet || Sheet.create!(
       month: month,
       year: year,
-      income: 0,
+      income: Sheet.new_starting_income,
       bill_totals: bill_totals,
+      payday_count: 0
     )
 
   end
@@ -79,49 +80,42 @@ class UpdateSpreadsheetService
     current_sheet || Sheet.create!(
       month: next_month,
       year: update_year,
-      income: 0,
+      income: Sheet.new_starting_income,
       bill_totals: bill_totals,
+      payday_count: 0
     )
   end
 
-  def got_paid
-    binding.pry
-    update_sheet_send_text(@amount)
-  end
+  # update to handle geting paid late
+  # right now users need to ensure all 4 paydays are entered between
+  # 1st and last day of the month. Not ideal.
+  def payday
+    target_sheet = find_current_sheet
 
-
-  # updates next month income when user gets a paycheck, send confirm text.
-  def update_sheet_send_text(amount)
-
-    current_sheet = find_next_month_sheet
+    # 2 people x 2 paydays per month == 4
+    if target_sheet.payday_count > 3
+      target_sheet = find_next_month_sheet
+      if day < 27
+        message = "This is the 5th payday entered this month. Your " \
+          "paycheck was added to next month's (#{next_month}/#{update_year}) income."
+        OutgoingSmsService.new(to_user_id: @user_id, body: message).send
+      end
+    end
     
-    new_income = current_sheet.income + amount
+    updated_income = target_sheet.income + @amount
+    updated_payday_count = target_sheet.payday_count + 1
 
     begin
-      current_sheet.update!(
-        income: new_income
+      target_sheet.update!(
+        income: updated_income,
+        payday_count: updated_payday_count,
       )
     rescue StandardError => e
       error_message = "Failed up update balance, error: #{e.message}"
       OutgoingSmsService.new(to_user_id: @user_id, body: error_message).send
     end
-    message = "Balance updated, #{next_month}/#{update_year} is now #{new_income}"
+    message = "Balance updated, the total for #{target_sheet.month}/#{target_sheet.year} is now #{updated_income}. " \
+      "#{updated_payday_count} paydays have been logged this month."
     OutgoingSmsService.new(to_user_id: @user_id, body: message).send
   end
 end
-
-# Transaction.create!(
-#     "tx_name": "POSTMAN",
-#     "tx_type": "lll",
-#     "tx_amount": 500,
-#     "user_id": 0,
-#     "tx_currency": "USD"
-# )
-
-# {
-#   "tx_name": "POSTMAN",
-#   "tx_type": "lll",
-#   "tx_amount": 500,
-#   "user_id": 0,
-#   "tx_currency": "USD"
-# }

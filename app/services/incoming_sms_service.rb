@@ -53,12 +53,13 @@ class IncomingSmsService
       'sabrina spent',
       'together spent',
       'list commands',
-      'list bills',
+      'list bill names',
+      'list bill amounts',
     ].concat(update_commands, create_command)
   end
 
   def all_bill_names
-    @_all_bill_name ||= Bill.bill_names
+    @_all_bill_name ||= Bill.all_bill_names.join(' ')
   end
 
   def body_array
@@ -66,25 +67,27 @@ class IncomingSmsService
   end
 
   def parse_body
-    chunks = body_array
-    command = nil
-    amount = nil
-    prefix = nil
-    bill_name = nil
+    @_parse_body ||= begin
+      chunks = body_array
+      command = nil
+      amount = nil
+      prefix = nil
+      middle = nil
 
-    if chunks.size == 2
-      command = "#{chunks[0]} #{chunks[1]}"
-    elsif chunks.size == 3
-      prefix = chunks[0]
-      bill_name = chunks[1]
-      amount = chunks[2].to_f
+      if chunks.size == 2
+        command = "#{chunks[0]} #{chunks[1]}"
+      elsif chunks.size == 3
+        prefix = chunks[0]
+        middle = chunks[1]
+        amount = chunks[2].to_f
+      end
+      { 
+        command: command,
+        amount: amount,
+        prefix: prefix,
+        middle: middle
+      }
     end
-    { 
-      command: command,
-      amount: amount,
-      prefix: prefix,
-      bill_name: bill_name
-    }
   end
 
   def body_correct_length?
@@ -109,10 +112,12 @@ class IncomingSmsService
 
   def handle_info_request_command
     case parse_body[:command]
-    when 'list bills'
-      # list('bills')
+    when 'list bill amounts'
+      list_bills('amounts')
+    when 'list bill names'
+      list_bills('names')
     when 'list commands'
-      # list('commands')
+      list_commands
     when 'cal status'
       get_status('user_1', "Cal's")
     when 'sabrina status'
@@ -122,17 +127,63 @@ class IncomingSmsService
     end
   end
 
-  # def handle_data_update_command
-  # end
+  def list_bills(type)
+    if type == 'names'
+      reply = "Here are the names of your bills: #{all_bill_names.sort.join(' ')}"
+      OutgoingSmsService.new(to_user_id: from_user_id, body: reply)
+    else
+      all_bills_formatted = Bill.all.order(:bill_name).map do |bill|
+        "#{bill.bill_name}: $#{bill.bill_amount} per month"
+      end.join(",\n")
+      reply = "Here are the names of your bills and their amounts:\n#{all_bills_formatted}."
+      OutgoingSmsService.new(to_user_id: from_user_id, body: reply)
+    end
+  end
 
-  # def list(data)
-  # end
+  def all_command_names
+    [
+      'update (bill_name) (amount)',
+      'create (new_bill_name) (amount)',
+      'cal status',
+      'sabrina status',
+      'together status',
+      'new payday (amount)',
+      'cal spent (amount)',
+      'sabrina spent (amount)',
+      'together spent (amount)',
+      'list commands',
+      'list bill names',
+      'list bill amounts',
+    ]
+  end
+
+  def list_commands
+    reply = "Valid commands:\n#{all_command_names.join(",\n")}."
+    OutgoingSmsService.new(to_user_id: from_user_id, body: reply)
+  end
+
+
+  def create_update_bill(name:, amount:, type:)
+    if type == 'create'
+      UpdateDbService.new(user_id: from_user_id, amount: amount, bill_name: name).create_bill
+    else
+      UpdateDbService.new(user_id: from_user_id, amount: amount, bill_name: name).update_bill
+    end
+  end
+
+  def process_payday
+    UpdateDbService.new(user_id: from_user_id, amount: parse_body[:amount], bill_name: nil).payday
+  end
 
   def call_user_requested_service
     if body_array.length == 2
       handle_info_request_command
-    elsif body_array.length == 3
-      # handle_data_update_command
+    elsif parse_body[:prefix] == 'create' || parse_body[:prefix] == 'update'
+      create_update_bill(name: parse_body[:middle], amount: parse_body[:amount], type: parse_body[:prefix])
+    elsif parse_body:[middle] == 'payday'
+      process_payday
+    # elsif
+      # handle parse[:middle] == spent commands
     end
   end
 
@@ -154,9 +205,4 @@ class IncomingSmsService
     reply = "#{name} budget remaining this month: $#{user_budget}. Total spent this month: $#{user_spent}"
     OutgoingSmsService.new(to_user_id: from_user_id, body: reply)
   end
-
-  def create_bill(amount)
-    UpdateSpreadsheetService.new(user_id: from_user_id, amount: amount).create_bill
-  end
- 
 end
