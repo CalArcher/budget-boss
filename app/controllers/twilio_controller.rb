@@ -1,5 +1,4 @@
 class TwilioController < ApplicationController
-  protect_from_forgery except: :receive_text
 
   # TODO
   # def receive_text
