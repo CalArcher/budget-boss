@@ -1,16 +1,11 @@
+require_relative '../helpers/time_helper'
+
 class IncomingSmsService
+  include TimeHelper
 
   def initialize(body:, from_number:)
     @body = body.downcase
     @from_number = from_number.to_s
-  end
-
-  def year
-    @_year ||= Time.now.year
-  end
-
-  def month
-    @_month ||= Time.now.month
   end
 
   def from_user_id
@@ -19,6 +14,10 @@ class IncomingSmsService
       ENV['2'] => '2',
     }
     user_id_map[@from_number] || 0
+  end
+
+  def send_sms(message)
+    OutgoingSmsService.new(to_user_id: from_user_id, body: message).send
   end
 
   def recognized_user?
@@ -59,7 +58,7 @@ class IncomingSmsService
   end
 
   def all_bill_names
-    @_all_bill_name ||= Bill.bill_names.join(' ')
+    @_all_bill_name ||= Bill.bill_names
   end
 
   def body_array
@@ -69,24 +68,13 @@ class IncomingSmsService
   def parse_body
     @_parse_body ||= begin
       chunks = body_array
-      command = nil
-      amount = nil
-      prefix = nil
-      middle = nil
 
-      if chunks.size == 2
-        command = "#{chunks[0]} #{chunks[1]}"
-      elsif chunks.size == 3
-        prefix = chunks[0]
-        middle = chunks[1]
-        amount = chunks[2].to_f
+      case chunks.size
+      when 2
+        { command: chunks.join(' ') }
+      when 3
+        { prefix: chunks[0], middle: chunks[1], amount: chunks[2].to_f }
       end
-      { 
-        command: command,
-        amount: amount,
-        prefix: prefix,
-        middle: middle
-      }
     end
   end
 
@@ -106,7 +94,7 @@ class IncomingSmsService
       true
     else
       error_message = "\"#{@body}\" is an invalid command. Reply \"List commands\" to show valid commands"
-      OutgoingSmsService.new(to_user_id: from_user_id, body: error_message)
+      send_sms(error_message)
     end
   end
 
@@ -123,20 +111,20 @@ class IncomingSmsService
     when 'sabrina status'
       get_status('user_2', "Sabrina's")
     when 'together status'
-      get_status('together', 'Together')
+      get_status('user_3', 'Together')
     end
   end
 
   def list_bills(type)
     if type == 'names'
       reply = "Here are the names of your bills: #{all_bill_names.sort.join(' ')}"
-      OutgoingSmsService.new(to_user_id: from_user_id, body: reply)
+      send_sms(reply)
     else
       all_bills_formatted = Bill.all.order(:bill_name).map do |bill|
         "#{bill.bill_name}: $#{bill.bill_amount} per month"
       end.join(",\n")
       reply = "Here are the names of your bills and their amounts:\n#{all_bills_formatted}."
-      OutgoingSmsService.new(to_user_id: from_user_id, body: reply)
+      send_sms(reply)
     end
   end
 
@@ -159,20 +147,28 @@ class IncomingSmsService
 
   def list_commands
     reply = "Valid commands:\n#{all_command_names.join(",\n")}."
-    OutgoingSmsService.new(to_user_id: from_user_id, body: reply)
+    send_sms(reply)
   end
-
 
   def create_update_bill(name:, amount:, type:)
     if type == 'create'
-      UpdateDbService.new(user_id: from_user_id, amount: amount, bill_name: name).create_bill
+      UpdateBillService.new(user_id: from_user_id, amount: amount, bill_name: name).create_bill
     else
-      UpdateDbService.new(user_id: from_user_id, amount: amount, bill_name: name).update_bill
+      UpdateBillService.new(user_id: from_user_id, amount: amount, bill_name: name).update_bill
     end
   end
 
   def process_payday
-    UpdateDbService.new(user_id: from_user_id, amount: parse_body[:amount], bill_name: nil).payday
+    UpdateSheetService.new(user_id: from_user_id, amount: parse_body[:amount], bill_name: nil).payday
+  end
+
+  def process_user_transaction
+    transaction = UpdateSheetService.new(user_id: from_user_id, amount: parse_body[:amount], bill_name: nil)
+    if parse_body[:amount] >= 0
+      transaction.user_transaction_spend
+    else
+      transaction.user_transaction_save
+    end
   end
 
   def call_user_requested_service
@@ -182,12 +178,13 @@ class IncomingSmsService
       create_update_bill(name: parse_body[:middle], amount: parse_body[:amount], type: parse_body[:prefix])
     elsif parse_body[:middle] == 'payday'
       process_payday
-    # elsif
-      # handle parse[:middle] == spent commands
+    elsif parse_body[:middle] == 'spent'
+      process_user_transaction
     end
   end
 
   def handle_reply
+    binding.pry
     return unless recognized_user?
     return unless command_valid?
     call_user_requested_service
@@ -197,12 +194,18 @@ class IncomingSmsService
     user_budget_column = "#{user}_budget" # column name to query
     user_spent_column = "#{user}_spent" # column name to query
 
-    sheet = Sheet.where(month: month, year: year)
+    sheet = Sheet.find_or_create_sheet(month, year)
 
-    user_spent = sheet.pluck(user_spent_column).first
-    user_budget = sheet.pluck(user_budget_column).first
+    if sheet.nil?
+      error_message = "Cannot find sheet, please try again"
+      send_sms(error_message)
+      return
+    end
+
+    user_spent = sheet[user_spent_column]
+    user_budget = sheet[user_budget_column]
 
     reply = "#{name} budget remaining this month: $#{user_budget}. Total spent this month: $#{user_spent}"
-    OutgoingSmsService.new(to_user_id: from_user_id, body: reply)
+    send_sms(reply)
   end
 end

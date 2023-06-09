@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_21_214149) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_06_142450) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "bills", force: :cascade do |t|
     t.string "bill_name", null: false
-    t.integer "bill_amount", null: false
+    t.float "bill_amount", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -24,17 +24,19 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_214149) do
   create_table "sheets", force: :cascade do |t|
     t.integer "month", null: false
     t.integer "year", null: false
-    t.integer "income", null: false
-    t.integer "bill_totals", null: false
-    t.integer "total_spent"
-    t.integer "together_budger"
-    t.integer "user_1_budget"
-    t.integer "user_1_spent"
-    t.integer "user_2_budget"
-    t.integer "user_2_spent"
+    t.float "income", null: false
+    t.float "bill_totals", null: false
+    t.float "total_spent"
+    t.float "user_3_budget"
+    t.float "user_1_budget"
+    t.float "user_1_spent"
+    t.float "user_2_budget"
+    t.float "user_2_spent"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "payday_count"
+    t.decimal "user_3_spent"
+    t.integer "monthly_service"
   end
 
   create_table "text_recieves", force: :cascade do |t|
@@ -58,11 +60,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_214149) do
   create_table "transactions", force: :cascade do |t|
     t.string "tx_name", null: false
     t.string "tx_type", null: false
-    t.integer "tx_amount", null: false
+    t.float "tx_amount", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.string "tx_currency"
   end
 
   create_table "user_commands", force: :cascade do |t|
