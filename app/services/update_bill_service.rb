@@ -1,16 +1,10 @@
-require_relative '../helpers/time_helper'
-
 class UpdateBillService
-  include TimeHelper
+  include SmsHelper
 
-  def initialize(user_id:, amount:, bill_name:)
-    @user_id = user_id
+  def initialize(to_user:, amount:, bill_name:)
+    @to_user = to_user
     @amount = amount
     @bill_name = bill_name
-  end
-
-  def send_sms(message)
-    OutgoingSmsService.new(to_user_id: @user_id, body: message).send
   end
 
   def create_bill
@@ -19,26 +13,26 @@ class UpdateBillService
         bill_name: @bill_name,
         bill_amount: @amount,
       )
-      message = "Created new bill: #{@bill_name} at #{@amount} per month"
-      send_sms(message)
+      message = "Created new bill '#{@bill_name}' at $#{@amount} per month"
+      send_sms(@to_user, message)
     rescue StandardError => e
       error_message = "Failed to update bill. Error: #{e.message}"
-      send_sms(error_message)
+      send_sms(@to_user, error_message)
     end
   end
 
   def update_bill
     begin
-      bill = Bill.find_by(bill_name: @bill_name)
+      bill = Bill.find_by!(bill_name: @bill_name)
       previous_amount = bill.bill_amount
       bill.update!(
         bill_amount: @amount,
       )
-      message = "#{@bill_name} bill updated from #{previous_amount} to #{@amount} per month"
-      send_sms(message)
+      message = "Bill '#{@bill_name}' updated from $#{previous_amount} to $#{@amount} per month"
+      send_sms(@to_user, message)
     rescue StandardError => e
       error_message = "Failed up update bill. Error: #{e.message}"
-      send_sms(error_message)
+      send_sms(@to_user, error_message)
     end
   end
 end

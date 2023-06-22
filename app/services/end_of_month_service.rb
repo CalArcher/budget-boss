@@ -15,6 +15,10 @@ class EndOfMonthService
   def new_month
     return unless is_new_month?
 
+    # check if last month had 4 paydays => notify if not
+
+    # report remainder / over budget
+
 
 
     current_sheet.update!(

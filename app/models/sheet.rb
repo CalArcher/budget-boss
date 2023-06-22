@@ -21,8 +21,21 @@ class Sheet < ApplicationRecord
 
   # Each new month, your starting budget/income is all 4 paychecks from last month
   def self.new_starting_income
-    Sheet.where(payday_count: 4).order(year: :desc, month: :desc).first.income
+    # TODO: Should be just find month - 1 and year logic. If payday count < 4 err?
+    binding.pry # ERROR
+    Sheet.where(payday_count: 4)
   end
+
+  # TODO
+  # probably move this to different model / service
+  # def self.check_user_over_budget(sheet, column_name, spend_amount)
+  #   binding.pry
+  #   budget_value = sheet[column_name]
+  #   if budget_value < 0
+  #     # update savings value here as well
+  #     return true
+  #   end
+  # end
 
   def self.set_starting_values(sheet)
     starting_income = sheet.income
