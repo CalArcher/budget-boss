@@ -1,7 +1,7 @@
 class Bill < ApplicationRecord
 
   def self.bill_totals
-    Bill.pluck(:bill_amount).sum
+    Bill.pluck(:bill_amount).sum.to_f
   end
 
   def self.bill_names

@@ -35,7 +35,7 @@ module Commands
     end
   
     def validate
-      if correct_length? && is_saved_command? && is_reasonable_amount?(transaction_amount) &&
+      if correct_length? && is_saved_command? && is_reasonable_tx_amount?(transaction_amount) &&
         command_user.present? && numeric?(split_command.last) && transaction_amount > 0
         true
       else
@@ -46,7 +46,7 @@ module Commands
         elsif transaction_amount <= 0
           error_message = "Failed to log save. Amount must be greater than 0."
           send_sms(@to_user, error_message)
-        elsif !is_reasonable_amount?(transaction_amount)
+        elsif !is_reasonable_tx_amount?(transaction_amount)
           error_message = "Oops! $#{transaction_amount} seems a bit high."
           send_sms(@to_user, error_message)
         else

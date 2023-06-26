@@ -107,6 +107,7 @@ class UpdateSheetService
     rescue StandardError => e
       error_message = "Failed up update balance, error: #{e.message}"
       send_sms(@to_user, error_message)
+      return
     end
     message = "Balance updated, the total for #{target_sheet.month}/#{target_sheet.year} is now #{updated_income}. " \
       "#{updated_payday_count} paydays have been logged this month."

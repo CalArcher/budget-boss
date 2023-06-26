@@ -27,12 +27,8 @@ module Commands
       Float(input) != nil rescue false
     end
 
-    def is_reasonable_amount?(amount)
+    def is_reasonable_tx_amount?(amount)
       amount <= 2000
-    end
-
-    def current_sheet
-      ::Sheet.find_or_create_sheet(month, year)
     end
 
     def self.command_key

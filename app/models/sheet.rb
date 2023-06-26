@@ -1,52 +1,58 @@
 class Sheet < ApplicationRecord
+  include TimeHelper
+  include SmsHelper
 
   def self.find_or_create_sheet(month, year)
     existing_sheet = Sheet.find_by(month: month, year: year)
     existing_sheet || begin
-      existing_sheet = Sheet.create!(
+      new_sheet = Sheet.create!(
         month: month,
         year: year,
-        # income: new_starting_income,
-        income: 6200,
-        bill_totals: Bill.bill_totals,
+        income: 0,
+        bill_totals: 0,
         user_1_spent: 0,
         user_2_spent: 0,
         user_3_spent: 0,
         payday_count: 0,
+        saved: 0,
       )
-      set_starting_values(existing_sheet)
-      existing_sheet
+      set_starting_values(new_sheet)
+      new_sheet
     end
+  end
+
+  def last_month_valid_sheet
+    Sheet.find_by(payday_count: 4, month: last_month, year: year_of_last_month)
   end
 
   # Each new month, your starting budget/income is all 4 paychecks from last month
   def self.new_starting_income
-    # TODO: Should be just find month - 1 and year logic. If payday count < 4 err?
-    binding.pry # ERROR
-    Sheet.where(payday_count: 4)
+    last_sheet = last_month_valid_sheet
+    if last_sheet.nil?
+      error_message = 'Starting income not set, could not find last month sheet'
+      admin_message(error_message)
+      return
+    end
+
+    starting_income = last_sheet.income
   end
 
-  # TODO
-  # probably move this to different model / service
-  # def self.check_user_over_budget(sheet, column_name, spend_amount)
-  #   binding.pry
-  #   budget_value = sheet[column_name]
-  #   if budget_value < 0
-  #     # update savings value here as well
-  #     return true
-  #   end
-  # end
-
   def self.set_starting_values(sheet)
-    starting_income = sheet.income
-    bill_totals = sheet.bill_totals
-    savings_amount = ENV['MONTHLY_SAVINGS'].to_i
-    leftovers = starting_income - bill_totals - savings_amount
-    together_value = leftovers / 2
-    user_1_value = leftovers / 4
-    user_2_value = leftovers / 4
+    last_sheet = last_month_valid_sheet
+
+    starting_income = new_starting_income.to_f
+    bill_totals = Bill.bill_totals
+    savings_amount = ENV['MONTHLY_SAVINGS'].to_f
+    leftover_income = starting_income - (bill_totals + savings_amount)
+
+    user_1_value = (leftover_income / 4) + last_sheet.user_1_budget.to_f
+    user_2_value = (leftover_income / 4) + last_sheet.user_2_budget.to_f
+    user_3_value = (leftover_income / 2) + last_sheet.user_3_budget.to_f
+
     sheet.update!(
-      user_3_budget: together_value,
+      income: starting_income,
+      bill_totals: bill_totals
+      user_3_budget: user_3_value,
       user_1_budget: user_1_value,
       user_2_budget: user_2_value,
     )
