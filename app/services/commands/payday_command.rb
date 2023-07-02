@@ -23,11 +23,19 @@ module Commands
     end
 
     def reasonable_payday?
-      (payday_amount > 1000) && (payday_amount < ENV['MAX_PAYDAY'])
+      (payday_amount > 1000) && (payday_amount < ENV['MAX_PAYDAY'].to_f)
+    end
+
+    def valid_command?
+      [
+        correct_length?,
+        numeric?(split_command.last),
+        reasonable_payday?,
+      ].all?
     end
 
     def validate
-      if correct_length? && numeric?(split_command.last) && reasonable_payday?
+      if valid_command?
         true
       elsif !reasonable_payday?
         error_message = "That payday seems a bit high"

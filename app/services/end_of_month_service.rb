@@ -3,67 +3,54 @@ class EndOfMonthService
   include SmsHelper
 
   def end_of_month?
-    day == 1
+    current_day == 1
   end
 
   def end_of_month_service
     return unless end_of_month?
-    new_month_sheet = Sheet.find_or_create_sheet(month: month, yea: yearr)
+    new_month_sheet = Sheet.find_or_create_sheet(current_month, current_year, true)
 
-    return if new_month_sheet.monthly_service == 1
+    # prevent service multiple times on first day of month
+    return if new_month_sheet.monthly_service == 1 
 
     new_month_sheet.update!(
       monthly_service: 1,
     )
 
-    build_and_send_reports
-  end
-
-  def user_1
-    ::User.find(1)
-  end
-
-  def user_2
-    ::User.find(2)
-  end
-
-  def build_and_send_reports
     last_month_sheet = Sheet.find_by(month: last_month, year: year_of_last_month)
 
-
-    user_1_spent = last_month_sheet.user_1_spent
-    user_1_remaining = last_month_sheet.user_1_budget
-
-    user_2_spent = last_month_sheet.user_2_spent
-    user_2_remaining = last_month_sheet.user_2_budget
-
-    message = "Your end of month report is here! \n " \
-      "#{user_1.name}, you spent #{user_1_spent}, and have #{user_1_remaining} left that will be " \
-      "added your budget"
+    report_users.each do |user|
+      send_report(user, last_month_sheet, new_month_sheet)
+    end
   end
 
-  # def send_report(to_user, user_spent, user_remaining, last_month_sheet)
-  #   together_spent = last_month_sheet.user_3_spent
-  #   together_remaining = last_month_sheet.user_3_budget
+  def report_users
+    ::User.where(send_report: 1)
+  end
 
-  #   saved = last_month_sheet.saved
+  def send_report(to_user, last_month_sheet, new_month_sheet)
+    together_spent = last_month_sheet.user_3_spent
+    together_remaining = last_month_sheet.user_3_budget
+    together_new_budget = new_month_sheet.user_3_budget
 
-  #   user_budget_column = "#{to_user.key}_budget"
+    user_budget_column = "#{to_user.key}_budget"
+    user_spent_column = "#{to_user.key}_spent"
 
-  #   together_budget_column = "#{to_user.key}_budget"
-
-
-  #   starting_budget = Sheet.find_by(month: month, year: year)[user_budget_column]
+    user_new_budget = new_month_sheet[user_budget_column]
+    user_last_spent = last_month_sheet[user_spent_column]
+    user_remaining = last_month_sheet[user_budget_column]
   
-  #   user_name = to_user.name.capitalize
+    user_name = to_user.name.capitalize
 
-  #   operation = user_remaining > 0 ? 'added to' : 'subtracted from'
+    operation = user_remaining > 0 ? 'added to' : 'subtracted from'
 
-  #   message = "Hey #{user_name}, your end of month report is here! \n " \
-  #   "You spent #{user_spent}, and have #{user_remaining} left that will be " \
-  #   "#{operation} your new budget.\n This month, your budget is #{starting_budget}.\n" \
-  #   "Together, you spent #{together_spent}, and had #{together_remaining} left over" \
-  #   "This month, your shared budget is "
-  # end
+    message = "Hey #{user_name}, your end of month report is here!\n" \
+      "You spent $#{user_last_spent}, and have $#{user_remaining} left that will be " \
+      "#{operation} your new budget.\nThis month, your budget is $#{user_new_budget}.\n" \
+      "Together, you spent #{together_spent}, and had #{together_remaining} left over\n" \
+      "This month, your shared budget is $#{together_new_budget}."
+
+    send_sms(to_user, message)
+  end
 
 end

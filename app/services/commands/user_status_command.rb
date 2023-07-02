@@ -30,8 +30,16 @@ module Commands
       ::User.find_by(name: user_name_from_command)
     end
 
+    def valid_command?
+      [
+        correct_length?,
+        queried_user.present?,
+        status_request?,
+      ].all?
+    end
+
     def validate
-      if correct_length? && queried_user.present? && status_request?
+      if valid_command?
         true
       else
         invalid_command(@to_user, @command)
@@ -48,7 +56,7 @@ module Commands
       user_budget_column = "#{user.key}_budget" # column name to query
       user_spent_column = "#{user.key}_spent" # column name to query
 
-      sheet = ::Sheet.find_or_create_sheet(month, year)
+      sheet = ::Sheet.find_or_create_sheet(current_month, current_year)
 
       if sheet.nil?
         error_message = "Cannot find sheet, please try again"

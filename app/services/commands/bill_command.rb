@@ -47,10 +47,22 @@ module Commands
       registered_commands.keys.include?(bill_name)
     end
 
-    def validate
-      if correct_length? && correct_command_type? && bill_amount > 0 &&
-        !bill_protected_name? && numeric?(split_command.last)
+    def valid_bill_amount?
+      bill_amount > 0
+    end
 
+    def valid_command?
+      [
+        correct_length?,
+        correct_command_type?,
+        valid_bill_amount?,
+        !bill_protected_name?,
+        numeric?(split_command.last),
+      ].all?
+    end
+
+    def validate
+      if valid_command?
         true
       else
         if bill_protected_name?

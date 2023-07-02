@@ -19,7 +19,6 @@ module Commands
     end
 
     def amount
-      binding.pry # test
       split_command.last&.to_f&.round(2)
     end
 
@@ -35,9 +34,23 @@ module Commands
       @_transaction_amount ||= split_command.last&.to_f
     end
 
+    def valid_tx_amount?
+      transaction_amount > 0
+    end
+
+    def valid_command?
+      [
+        correct_length?,
+        is_spent_command?,
+        is_reasonable_tx_amount?(transaction_amount),
+        command_user.present?,
+        numeric?(split_command.last),
+        valid_tx_amount?,
+      ].all?
+    end
+
     def validate
-      if correct_length? && is_spent_command? && is_reasonable_tx_amount?(transaction_amount) &&
-        command_user.present? && numeric?(split_command.last) && transaction_amount > 0
+      if valid_command?
         true
       else
         # TODO: Make helper

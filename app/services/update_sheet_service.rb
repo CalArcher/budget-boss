@@ -18,7 +18,7 @@ class UpdateSheetService
   end
 
   def find_current_sheet
-    @_find_current_sheet ||= Sheet.find_or_create_sheet(month, year)
+    @_find_current_sheet ||= Sheet.find_or_create_sheet(current_month, current_year)
   end
 
   def find_next_month_sheet
@@ -38,7 +38,6 @@ class UpdateSheetService
     sheet = find_current_sheet
 
     remaining_budget = sheet[budget_column] - @amount
-    binding.pry
     over_budget = remaining_budget <= 0
 
     if over_budget
@@ -56,7 +55,7 @@ class UpdateSheetService
     add_to_sheet_column_value(column_spent, @amount)
     
     new_transaction(user_table_prefix, 'spend', @amount)
-    reply = "Success, #{command_user_name} added a spend transaction for $#{@amount} during #{month}/#{year}."
+    reply = "Success, #{command_user_name} added a spend transaction for $#{@amount} during #{current_month}/#{current_year}."
     send_sms(@to_user, reply)
   end
 
@@ -64,7 +63,7 @@ class UpdateSheetService
     add_to_sheet_column_value('saved', @amount)
     new_transaction(user_table_prefix, 'save', @amount)
     # TODO only send if transaction success
-    reply = "Success, #{command_user_name} added a save transaction for $#{@amount} during #{month}/#{year}."
+    reply = "Success, #{command_user_name} added a save transaction for $#{@amount} during #{current_month}/#{current_year}."
     send_sms(@to_user, reply)
   end
 
@@ -87,20 +86,20 @@ class UpdateSheetService
     # 2 people x 2 paydays per month == 4
     if target_sheet.payday_count > 3
       target_sheet = find_next_month_sheet
-      if day < 27
+      if current_day < 27
         message = "This is the 5th payday entered this month. Your " \
           "paycheck was added to next month's (#{next_month}/#{year_of_next_month}) income."
         send_sms(@to_user, message)
       end
     end
     
-    updated_income = target_sheet.income + @amount
+    updated_income = target_sheet.payday_sum + @amount
     updated_payday_count = target_sheet.payday_count + 1
     transaction_name = "#{user_table_prefix} payday"
 
     begin
       target_sheet.update!(
-        income: updated_income,
+        payday_sum: updated_income,
         payday_count: updated_payday_count,
       )
       new_transaction(transaction_name, 'save', @amount)

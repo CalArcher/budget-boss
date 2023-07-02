@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_20_013914) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_02_010754) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -38,6 +38,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_20_013914) do
     t.decimal "user_3_spent"
     t.integer "monthly_service"
     t.float "saved", default: 0.0
+    t.float "payday_sum"
   end
 
   create_table "text_recieves", force: :cascade do |t|
@@ -79,6 +80,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_20_013914) do
     t.string "phone_number"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "send_report"
+    t.integer "payday_date"
   end
 
 end
