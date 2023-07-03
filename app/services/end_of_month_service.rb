@@ -3,7 +3,7 @@ class EndOfMonthService
   include SmsHelper
 
   def end_of_month?
-    current_day == 1
+    current_day == 1 
   end
 
   def end_of_month_service
