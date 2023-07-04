@@ -16,6 +16,9 @@ class TwilioController < ApplicationController
   end
 
   def authenticate_twilio_request
+    puts(request.headers)
+    puts('----------------')
+    puts(request)
     twilio_signature = request.headers['X-Twilio-Signature']
     validator = Twilio::Security::RequestValidator.new(ENV['TWILIO_AUTH_TOKEN'])
 
