@@ -10,11 +10,11 @@ class OutgoingSmsService
     from = ENV['TWILIO_NUMBER']
     to = @to_user.phone_number
     puts "sent to #{to}: #{@body}"
-    # client.messages.create(
-    #   from: from,
-    #   to: to,
-    #   body: @body
-    # )
+    client.messages.create(
+      from: from,
+      to: to,
+      body: @body
+    )
   end
 
 end
