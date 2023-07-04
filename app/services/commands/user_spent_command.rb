@@ -18,10 +18,6 @@ module Commands
       @_split_command ||= @command.downcase.split(' ')
     end
 
-    def amount
-      split_command.last&.to_f&.round(2)
-    end
-
     def is_spent_command?
       split_command[1] == 'spent'
     end
@@ -30,13 +26,12 @@ module Commands
       split_command.length == 3
     end
 
-    # removes any leading dollar signs
-    def clean_amount(amount)
-      amount.gsub(/\A\$+/, "")
+    def clean_amount
+      @_clean_amount ||= strip_leading_dollars(split_command.last)
     end
 
     def transaction_amount
-      @_transaction_amount ||= clean_amount(split_command.last)&.to_f
+      @_transaction_amount ||= clean_amount&.to_f&.round(2)
     end
 
     def valid_tx_amount?
@@ -49,11 +44,12 @@ module Commands
         is_spent_command?,
         is_reasonable_tx_amount?(transaction_amount),
         command_user.present?,
-        numeric?(split_command.last),
+        numeric?(clean_amount),
         valid_tx_amount?,
       ].all?
     end
 
+    # TODO: DRY
     def notify_validation_error
       if command_user.nil?
         error_message = "#{split_command[0]} is not a recognized user."
@@ -78,8 +74,7 @@ module Commands
     end
 
     def execute
-      puts('execute called 76')
-      create_user_spend_transaction(@to_user, amount, command_user)
+      create_user_spend_transaction(@to_user, transaction_amount, command_user)
     end
 
     private

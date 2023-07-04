@@ -19,7 +19,11 @@ module Commands
     end
 
     def payday_amount
-      @_payday_amount ||= split_command.last&.to_f
+      @_payday_amount ||= clean_amount&.to_f&.round(2)
+    end
+
+    def clean_amount
+      @_clean_amount ||= strip_leading_dollars(split_command.last)
     end
 
     def reasonable_payday?
@@ -29,7 +33,7 @@ module Commands
     def valid_command?
       [
         correct_length?,
-        numeric?(split_command.last),
+        numeric?(clean_amount),
         reasonable_payday?,
       ].all?
     end

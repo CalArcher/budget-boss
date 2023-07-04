@@ -18,8 +18,8 @@ module Commands
       @_split_command ||= @command.downcase.split(' ')
     end
 
-    def amount
-      split_command.last&.gsub(/\$/, '')&.to_f
+    def clean_amount
+      @_clean_amount ||= strip_leading_dollars(split_command.last)
     end
 
     def is_saved_command?
@@ -31,7 +31,7 @@ module Commands
     end
 
     def transaction_amount
-      @_transaction_amount ||= split_command.last&.to_f
+      @_transaction_amount ||= clean_amount&.to_f&.to_f
     end 
 
     def valid_tx_amount?
@@ -44,7 +44,7 @@ module Commands
         is_saved_command?,
         is_reasonable_tx_amount?(transaction_amount),
         command_user.present?,
-        numeric?(split_command.last),
+        numeric?(clean_amount),
         valid_tx_amount?,
       ].all?
     end
@@ -73,7 +73,7 @@ module Commands
     end
 
     def execute
-      create_user_save_transaction(@to_user, amount, command_user)
+      create_user_save_transaction(@to_user, transaction_amount, command_user)
     end
 
     private

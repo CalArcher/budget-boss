@@ -27,6 +27,17 @@ module Commands
       Float(input) != nil rescue false
     end
 
+    # because regex is boring :) recursively remove only leading $
+    # better performance than .sub(/\A\$+/, "")
+    def strip_leading_dollars(str)
+      if str[0] == '$'
+        n_str = str.slice(1..-1)
+        strip_leading_dollars(n_str)
+      else
+        str
+      end
+    end
+
     def is_reasonable_tx_amount?(amount)
       amount <= 2000
     end

@@ -22,6 +22,10 @@ module Commands
       @_type_command ||= split_command[0]
     end
 
+    def clean_amount
+      @_clean_amount ||= strip_leading_dollars(split_command.last)
+    end
+
     def correct_length?
       split_command.length == 4
     end
@@ -31,17 +35,8 @@ module Commands
     end
 
     def bill_amount
-      @_bill_amount ||= split_command.last&.to_f&.round(2)
+      @_bill_amount ||= clean_amount&.to_f&.round(2)
     end
-
-    # todo
-#     Jul 2 11:23:06 PM  I, [2023-07-03T03:23:06.402091 #71]  INFO -- : [ae6f243f-2e33-4cc8-a46b-8b7d9b672359] Started POST "/receive_text" for 172.71.147.129 at 2023-07-03 03:23:06 +0000
-# Jul 2 11:23:06 PM  I, [2023-07-03T03:23:06.403006 #71]  INFO -- : [ae6f243f-2e33-4cc8-a46b-8b7d9b672359] Processing by TwilioController#receive_text as */*
-# Jul 2 11:23:06 PM  I, [2023-07-03T03:23:06.403082 #71]  INFO -- : [ae6f243f-2e33-4cc8-a46b-8b7d9b672359]   Parameters: {"ToCountry"=>"US", "ToState"=>"", "SmsMessageSid"=>"SM8067394425f4ca2de63c18116b81875f", "NumMedia"=>"0", "ToCity"=>"", "FromZip"=>"", "SmsSid"=>"SM8067394425f4ca2de63c18116b81875f", "FromState"=>"CO", "SmsStatus"=>"received", "FromCity"=>"", "Body"=>"Update bill money_machine 0", "FromCountry"=>"US", "To"=>"+18773461420", "ToZip"=>"", "NumSegments"=>"1", "MessageSid"=>"SM8067394425f4ca2de63c18116b81875f", "AccountSid"=>"AC31a8e50dd62ffbe4636c760dda4ad63c", "From"=>"+17206267560", "ApiVersion"=>"2010-04-01"}
-# Jul 2 11:23:06 PM  I, [2023-07-03T03:23:06.403236 #71]  INFO -- : [ae6f243f-2e33-4cc8-a46b-8b7d9b672359] {"ToCountry"=>"US", "ToState"=>"", "SmsMessageSid"=>"SM8067394425f4ca2de63c18116b81875f", "NumMedia"=>"0", "ToCity"=>"", "FromZip"=>"", "SmsSid"=>"SM8067394425f4ca2de63c18116b81875f", "FromState"=>"CO", "SmsStatus"=>"received", "FromCity"=>"", "Body"=>"Update bill money_machine 0", "FromCountry"=>"US", "To"=>"+18773461420", "ToZip"=>"", "NumSegments"=>"1", "MessageSid"=>"SM8067394425f4ca2de63c18116b81875f", "AccountSid"=>"AC31a8e50dd62ffbe4636c760dda4ad63c", "From"=>"+17206267560", "ApiVersion"=>"2010-04-01", "controller"=>"twilio", "action"=>"receive_text"}
-# Jul 2 11:23:06 PM  {"ToCountry"=>"US", "ToState"=>"", "SmsMessageSid"=>"SM8067394425f4ca2de63c18116b81875f", "NumMedia"=>"0", "ToCity"=>"", "FromZip"=>"", "SmsSid"=>"SM8067394425f4ca2de63c18116b81875f", "FromState"=>"CO", "SmsStatus"=>"received", "FromCity"=>"", "Body"=>"Update bill money_machine 0", "FromCountry"=>"US", "To"=>"+18773461420", "ToZip"=>"", "NumSegments"=>"1", "MessageSid"=>"SM8067394425f4ca2de63c18116b81875f", "AccountSid"=>"AC31a8e50dd62ffbe4636c760dda4ad63c", "From"=>"+17206267560", "ApiVersion"=>"2010-04-01", "controller"=>"twilio", "action"=>"receive_text"}
-# Jul 2 11:23:06 PM  sent to +17206267560: "update bill money_machine 0" is an invalid command. Reply "List commands" to show valid commands
-# Jul 2 11:23:07 PM  sent to +17206267560: Bill 'money_machine' updated from $-100.0 to $0.0 per month
 
     def correct_command_type?
       (all_bill_names.include?(bill_name) && command_type == 'update') ||
@@ -66,14 +61,21 @@ module Commands
         correct_command_type?,
         valid_bill_amount?,
         !bill_protected_name?,
-        numeric?(split_command.last),
+        numeric?(clean_amount),
       ].all?
     end
 
+    # TODO: DRY
     def notify_validation_error
       if bill_protected_name?
         error_message = "#{bill_name.capitalize} is a protected word. Please choose " \
           "a different name for your new bill"
+        send_sms(@to_user, error_message)
+      elsif !correct_command_type? && command_type == 'update'
+        error_message = "#{bill_name.capitalize} does not exist"
+        send_sms(@to_user, error_message)
+      elsif !correct_command_type? && command_type == 'create'
+        error_message = "#{bill_name.capitalize} already exists"
         send_sms(@to_user, error_message)
       else
         invalid_command(@to_user, @command)
