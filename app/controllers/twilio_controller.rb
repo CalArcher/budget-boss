@@ -2,7 +2,7 @@ class TwilioController < ApplicationController
 
   # skip_before_action :verify_authenticity_token
 
-  # before_action :authenticate_twilio_request, only: [:receive_text]
+  before_action :authenticate_twilio_request, only: [:receive_text]
 
   def receive_text
     logger.info params
@@ -15,15 +15,15 @@ class TwilioController < ApplicationController
     head :ok
   end
 
-  # def authenticate_twilio_request
-  #   twilio_signature = request.headers['X-Twilio-Signature']
-  #   validator = Twilio::Security::RequestValidator.new(ENV['TWILIO_AUTH_TOKEN'])
+  def authenticate_twilio_request
+    twilio_signature = request.headers['X-Twilio-Signature']
+    validator = Twilio::Security::RequestValidator.new(ENV['TWILIO_AUTH_TOKEN'])
 
-  #   url = url_for(only_path: false, action: 'receive_text')
+    url = url_for(only_path: false, action: 'receive_text')
 
-  #   unless validator.validate(url, request.parameters, twilio_signature)
-  #     head :unauthorized
-  #     return
-  #   end
-  # end
+    unless validator.validate(url, request.parameters, twilio_signature)
+      head :unauthorized
+      return
+    end
+  end
 end
