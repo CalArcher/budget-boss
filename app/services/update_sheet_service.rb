@@ -48,6 +48,7 @@ class UpdateSheetService
 #TODO trim space from body initially 
   #TODO add "remaining balance $$$"
   def user_transaction_spend
+    puts('in update sheet ln 51')
     column_budget = "#{user_table_prefix}_budget"
     column_spent = "#{user_table_prefix}_spent"
 

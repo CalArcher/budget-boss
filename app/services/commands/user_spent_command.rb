@@ -73,13 +73,14 @@ module Commands
     end
 
     def execute
-      puts('execute called 72')
+      puts('execute called 76')
       create_user_spend_transaction(@to_user, amount, command_user)
     end
 
     private
 
     def create_user_spend_transaction(to_user, amount, command_user)
+      puts('ln 83')
       UpdateSheetService.new(to_user: to_user, amount: amount, command_user: command_user).user_transaction_spend
     end
  
