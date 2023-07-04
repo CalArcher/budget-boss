@@ -65,11 +65,7 @@ class IncomingSmsService
     command_class = registry_entry[1].new(command: @body, to_user: from_user)
     is_valid_command = command_class&.validate
 
-    test = (is_valid_command == true)
-
-    puts("#{is_valid_command}")
-    puts("test: #{test}")
-    if is_valid_command == 'true'
+    if is_valid_command == true
       command_class.execute
     end
   end

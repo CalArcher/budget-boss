@@ -51,7 +51,7 @@ module Commands
 
     def validate
       if valid_command?
-        'true'
+        true
       else
         # TODO: Make helper
         if command_user.nil?
@@ -66,6 +66,7 @@ module Commands
         else
           invalid_command(@to_user, @command)
         end
+        false
       end
     end
 
