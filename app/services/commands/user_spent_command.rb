@@ -50,8 +50,10 @@ module Commands
     end
 
     def validate
+      puts('--------ln53---------')
+      puts(@command)
       if valid_command?
-        puts('command validated 54')
+        puts('valid ln 56')
         true
       else
         # TODO: Make helper

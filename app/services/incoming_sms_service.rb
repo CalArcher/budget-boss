@@ -65,8 +65,9 @@ class IncomingSmsService
     command_class = registry_entry[1].new(command: @body, to_user: from_user)
     is_valid_command = command_class&.validate
 
-    binding.pry
+    puts(is_valid_command)
     if is_valid_command
+      puts('is valid command 70')
       command_class.execute
     end
   end
