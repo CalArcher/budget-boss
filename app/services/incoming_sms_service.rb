@@ -69,7 +69,7 @@ class IncomingSmsService
     puts('-----------ln68---------')
     puts("is_valid: #{is_valid_command}")
     puts('-----------ln70---------')
-    if is_valid_command
+    if is_valid_command == true
       puts('is valid command 72')
       command_class.execute
     end
