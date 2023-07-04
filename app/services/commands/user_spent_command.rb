@@ -30,8 +30,13 @@ module Commands
       split_command.length == 3
     end
 
+    # removes any leading dollar signs
+    def clean_amount(amount)
+      amount.gsub(/\A\$+/, "")
+    end
+
     def transaction_amount
-      @_transaction_amount ||= split_command.last&.to_f
+      @_transaction_amount ||= clean_amount(split_command.last)&.to_f
     end
 
     def valid_tx_amount?
