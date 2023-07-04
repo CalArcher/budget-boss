@@ -65,6 +65,7 @@ class IncomingSmsService
     command_class = registry_entry[1].new(command: @body, to_user: from_user)
     is_valid_command = command_class&.validate
 
+    binding.pry
     if is_valid_command
       command_class.execute
     end

@@ -51,6 +51,7 @@ module Commands
 
     def validate
       if valid_command?
+        puts('command validated 54')
         true
       else
         # TODO: Make helper
@@ -70,6 +71,7 @@ module Commands
     end
 
     def execute
+      puts('execute called 72')
       create_user_spend_transaction(@to_user, amount, command_user)
     end
 
