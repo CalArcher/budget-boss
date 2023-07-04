@@ -70,17 +70,21 @@ module Commands
       ].all?
     end
 
+    def notify_validation_error
+      if bill_protected_name?
+        error_message = "#{bill_name.capitalize} is a protected word. Please choose " \
+          "a different name for your new bill"
+        send_sms(@to_user, error_message)
+      else
+        invalid_command(@to_user, @command)
+      end
+    end
+
     def validate
       if valid_command?
-        true
+        'valid!'
       else
-        if bill_protected_name?
-          error_message = "#{bill_name.capitalize} is a protected word. Please choose " \
-            "a different name for your new bill"
-          send_sms(@to_user, error_message)
-        else
-          invalid_command(@to_user, @command)
-        end
+        notify_validation_error
       end
     end
 

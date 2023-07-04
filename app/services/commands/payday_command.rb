@@ -34,14 +34,20 @@ module Commands
       ].all?
     end
 
-    def validate
-      if valid_command?
-        true
-      elsif !reasonable_payday?
+    def notify_validation_error
+      if !reasonable_payday?
         error_message = "That payday seems a bit high"
         send_sms(@to_user, error_message)
       else
         invalid_command(@to_user, @command)
+      end
+    end
+
+    def validate
+      if valid_command?
+        'valid!'
+      else
+        notify_validation_error
       end
     end
 

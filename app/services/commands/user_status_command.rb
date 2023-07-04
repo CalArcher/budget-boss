@@ -38,11 +38,15 @@ module Commands
       ].all?
     end
 
+    def notify_validation_error
+      invalid_command(@to_user, @command)
+    end
+
     def validate
       if valid_command?
-        true
+        'valid!'
       else
-        invalid_command(@to_user, @command)
+        notify_validation_error
       end
     end
 

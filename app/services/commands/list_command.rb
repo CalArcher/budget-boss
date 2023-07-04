@@ -23,11 +23,15 @@ module Commands
       all_list_commands.include?(@command.downcase)
     end
 
+    def notify_validation_error
+      invalid_command(@to_user, @command)
+    end
+
     def validate
       if is_valid_list_command?
-        true
+        'valid!'
       else
-        invalid_command(@to_user, @command)
+        notify_validation_error
       end
     end
 
