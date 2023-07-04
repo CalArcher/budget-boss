@@ -45,7 +45,6 @@ class UpdateSheetService
     end
   end
 
-#TODO trim space from body initially 
   #TODO add "remaining balance $$$"
   def user_transaction_spend
     column_budget = "#{user_table_prefix}_budget"

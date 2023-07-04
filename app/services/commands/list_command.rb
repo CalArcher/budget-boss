@@ -6,11 +6,6 @@ module Commands
       @to_user = to_user
     end
 
-
-
-    # sent to 720312127: "list bill names" is an invalid command. Reply "List commands" to show valid commands
-# => nil
-
     def self.command_key
       'list'
     end

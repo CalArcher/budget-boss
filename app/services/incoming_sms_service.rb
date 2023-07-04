@@ -2,7 +2,7 @@ class IncomingSmsService
   include SmsHelper
 
   def initialize(body:, from_number:)
-    @body = body.downcase
+    @body = body.downcase.trim
     @from_number = from_number.to_s
   end
 
