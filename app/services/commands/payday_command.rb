@@ -27,7 +27,7 @@ module Commands
     end
 
     def reasonable_payday?
-      (payday_amount > 1000) && (payday_amount < ENV['MAX_PAYDAY'].to_f)
+      (payday_amount > ENV['MIN_PAYDAY']) && (payday_amount < ENV['MAX_PAYDAY'].to_f)
     end
 
     def valid_command?
@@ -40,7 +40,7 @@ module Commands
 
     def notify_validation_error
       if !reasonable_payday?
-        error_message = "That payday seems a bit high"
+        error_message = "Paydays must be greater than #{ENV['MIN_PAYDAY']} and less than #{ENV['MAX_PAYDAY']}"
         send_sms(@to_user, error_message)
       else
         invalid_command(@to_user, @command)
