@@ -1,6 +1,6 @@
 # Budget Boss
 
-Budget Boss is a simple Ruby on Rails application that allows you to track your monthly budget via text messages. Every time you make a purchase, simply send a text message to the application with the amount spent, and the app will automatically deduct it from your monthly budget. You can also use text commands to add to your budget or check your current budget status.
+Budget Boss is a simple Ruby on Rails application that allows you to track your monthly budget via text messages. Every time you make a purchase, simply send a text message to the application with the amount spent, and the app will automatically deduct it from your monthly budget. You can also use text commands to add to your budget, create bills, or check your current budget status.
 
 ## Features
 
@@ -15,4 +15,16 @@ Use text commands to:
 
 - Ruby on Rails
 - PostgreSQL
-- Twilio API
+- Twilio
+- AWS
+- Nginx
+
+
+## TODO Features:
+
+- Add delete/remove bills
+- Specify which month a payday is for instead of defaulting to the current month (paid late, paid early)
+- Expand available commands to add more functionality like serving a user historical data
+- Better error handling
+- reversing a transaction (undo)
+- listing a users recent transactions
