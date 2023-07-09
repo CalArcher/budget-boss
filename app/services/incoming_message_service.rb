@@ -1,13 +1,13 @@
-class IncomingSmsService
+class IncomingMessageService
   include SmsHelper
 
-  def initialize(body:, from_number:)
-    @body = body.downcase.strip
-    @from_number = from_number.to_s
+  def initialize(body:, from_username:)
+    @body = body&.downcase&.strip
+    @from_username = from_username&.to_s
   end
 
   def from_user
-    User.find_by!(phone_number: @from_number)
+    User.find_by!(discord_username: @from_username)
   end
 
   def body_array
@@ -15,12 +15,12 @@ class IncomingSmsService
   end
 
   def body_correct_length?
-    body_array.length >= 2 || body_array.length <= 4
+    body_array.length >= 2 && body_array.length <= 4
   end
 
   def reply_invalid_command
     error_message = "\"#{@body}\" is an invalid command. Reply \"List commands\" to show valid commands"
-    send_sms(from_user, error_message)
+    send_message(from_user, error_message)
   end
 
   def command_valid_length?
@@ -28,6 +28,7 @@ class IncomingSmsService
       true
     else
       reply_invalid_command
+      false
     end
   end
 
@@ -71,7 +72,8 @@ class IncomingSmsService
   end
 
   def process_incoming_message
-    return unless command_valid_length? && from_user.present?
+    return if [command_valid_length?, from_user].any?(&:blank?)
+
     register_all_commands
     registered_commands = Commands::CommandRegistry.list_registered_commands
 

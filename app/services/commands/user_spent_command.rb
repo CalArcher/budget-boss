@@ -53,13 +53,13 @@ module Commands
     def notify_validation_error
       if command_user.nil?
         error_message = "#{split_command[0]} is not a recognized user."
-        send_sms(@to_user, error_message)
+        send_message(@to_user, error_message)
       elsif transaction_amount <= 0
         error_message = "Failed to log spend. Amount must be greater than 0."
-        send_sms(@to_user, error_message)
+        send_message(@to_user, error_message)
       elsif !is_reasonable_tx_amount?(transaction_amount)
         error_message = "Oops! $#{transaction_amount} seems a bit high."
-        send_sms(@to_user, error_message)
+        send_message(@to_user, error_message)
       else
         invalid_command(@to_user, @command)
       end

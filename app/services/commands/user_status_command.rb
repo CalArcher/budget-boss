@@ -64,7 +64,7 @@ module Commands
 
       if sheet.nil?
         error_message = "Cannot find sheet, please try again"
-        send_sms(@to_user, error_message)
+        send_message(@to_user, error_message)
         return
       end
 
@@ -72,7 +72,7 @@ module Commands
       user_budget = sheet[user_budget_column]
 
       reply = "Remaining budget for #{user.name.capitalize} this month: $#{user_budget}. Total spent this month: $#{user_spent}."
-      send_sms(@to_user, reply)
+      send_message(@to_user, reply)
     end
 
   end

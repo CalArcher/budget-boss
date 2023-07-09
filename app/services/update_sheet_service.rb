@@ -57,7 +57,7 @@ class UpdateSheetService
     
     new_transaction(user_table_prefix, 'spend', @amount)
     reply = "Success, #{command_user_name} added a spend transaction for $#{@amount} during #{current_month}/#{current_year}."
-    send_sms(@to_user, reply)
+    send_message(@to_user, reply)
   end
 
   def user_transaction_save
@@ -65,7 +65,7 @@ class UpdateSheetService
     new_transaction(user_table_prefix, 'save', @amount)
     # TODO only send if transaction success
     reply = "Success, #{command_user_name} added a save transaction for $#{@amount} during #{current_month}/#{current_year}."
-    send_sms(@to_user, reply)
+    send_message(@to_user, reply)
   end
 
   def add_to_sheet_column_value(column_name, tx_amount)
@@ -75,7 +75,7 @@ class UpdateSheetService
       sheet.update!(column_name => new_column_value)
     rescue StandardError => e
       error_message = "Failed to log spend. Error: #{e.message}"
-      send_sms(@to_user, error_message)
+      send_message(@to_user, error_message)
     end
   end
 
@@ -90,7 +90,7 @@ class UpdateSheetService
       if current_day < 27
         message = "This is the 5th payday entered this month. Your " \
           "paycheck was added to next month's (#{next_month}/#{year_of_next_month}) income."
-        send_sms(@to_user, message)
+        send_message(@to_user, message)
       end
     end
     
@@ -106,11 +106,11 @@ class UpdateSheetService
       new_transaction(transaction_name, 'save', @amount)
     rescue StandardError => e
       error_message = "Failed up update balance, error: #{e.message}"
-      send_sms(@to_user, error_message)
+      send_message(@to_user, error_message)
       return
     end
     message = "Balance updated, the total for #{target_sheet.month}/#{target_sheet.year} is now #{updated_income}. " \
       "#{updated_payday_count} paydays have been logged this month."
-    send_sms(@to_user, message)
+    send_message(@to_user, message)
   end
 end

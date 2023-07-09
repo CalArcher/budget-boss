@@ -51,7 +51,7 @@ class EndOfMonthService
       "Together, you spent #{together_spent}, and had #{together_remaining} left over\n" \
       "This month, your shared budget is $#{together_new_budget}."
 
-    send_sms(to_user, message)
+    send_message(to_user, message)
   end
 
 end

@@ -21,7 +21,7 @@ class PaydayReminderService
     report_users.each do |user|
       message = "Its the end of the month and #{payday_text} paydays have been logged. " \
         'Please remember to log your paydays by replying "Payday (amount)".'
-      send_sms(user, message)
+      send_message(user, message)
     end
   end
 

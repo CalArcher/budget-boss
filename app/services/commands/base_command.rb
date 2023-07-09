@@ -20,7 +20,7 @@ module Commands
 
     def invalid_command(to_user, original_command)
       error_message = "\"#{original_command}\" is an invalid command. Reply \"List commands\" to show valid commands"
-      send_sms(to_user, error_message)
+      send_message(to_user, error_message)
     end
 
     def numeric?(input)
