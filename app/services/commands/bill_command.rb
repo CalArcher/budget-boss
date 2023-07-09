@@ -68,14 +68,14 @@ module Commands
     # TODO: DRY
     def notify_validation_error
       if bill_protected_name?
-        error_message = "#{bill_name.capitalize} is a protected word. Please choose " \
+        error_message = "**#{bill_name.capitalize}** is a protected word. Please choose " \
           "a different name for your new bill"
         send_message(@to_user, error_message)
       elsif !correct_command_type? && command_type == 'update'
-        error_message = "#{bill_name.capitalize} does not exist"
+        error_message = "**#{bill_name.capitalize}** does not exist"
         send_message(@to_user, error_message)
       elsif !correct_command_type? && command_type == 'create'
-        error_message = "#{bill_name.capitalize} already exists"
+        error_message = "**#{bill_name.capitalize}** already exists"
         send_message(@to_user, error_message)
       else
         invalid_command(@to_user, @command)

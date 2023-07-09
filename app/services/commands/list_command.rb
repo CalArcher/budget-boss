@@ -67,16 +67,19 @@ module Commands
  
     def list_bills
       all_bills_formatted = ::Bill.all.order(:bill_name).map do |bill|
-        "#{bill.bill_name}: $#{bill.bill_amount}/month"
+        "- #{bill.bill_name}: $#{bill.bill_amount}/month"
       end.join(",\n")
-      reply = "Here are the names of your bills and their amounts:\n#{all_bills_formatted}."
-      send_sms(@to_user, reply)
+      reply = "Here are the names of your bills and their amounts:\n\n#{all_bills_formatted}."
+      send_message(@to_user, reply)
       
     end
 
     def list_commands
-      reply = "Valid commands:\n#{all_command_names.join(",\n")}."
-      send_sms(@to_user, reply)
+      md_format_commands = all_command_names.map do |command|
+        "- #{command}\n"
+      end.join('')
+      reply = "**Valid commands:** \n#{md_format_commands}"
+      send_message(@to_user, reply)
     end
 
   end

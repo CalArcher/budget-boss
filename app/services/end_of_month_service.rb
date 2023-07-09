@@ -45,11 +45,11 @@ class EndOfMonthService
 
     operation = user_remaining > 0 ? 'added to' : 'subtracted from'
 
-    message = "Hey #{user_name}, your end of month report is here!\n" \
-      "You spent $#{user_last_spent}, and have $#{user_remaining} left that will be " \
-      "#{operation} your new budget.\nThis month, your budget is $#{user_new_budget}.\n" \
-      "Together, you spent #{together_spent}, and had #{together_remaining} left over\n" \
-      "This month, your shared budget is $#{together_new_budget}."
+    message = "Hey **#{user_name}**, your end of month report is here!\n\n" \
+      "- You spent $#{user_last_spent}, and have $#{user_remaining} left that will be " \
+      "#{operation} your new budget.\n- This month, your budget is $#{user_new_budget}.\n" \
+      "- Together, you spent #{together_spent}, and had #{together_remaining} left over\n" \
+      "- This month, your shared budget is $#{together_new_budget}."
 
     send_message(to_user, message)
   end

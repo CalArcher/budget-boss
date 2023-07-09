@@ -19,7 +19,12 @@ class IncomingMessageService
   end
 
   def reply_invalid_command
-    error_message = "\"#{@body}\" is an invalid command. Reply \"List commands\" to show valid commands"
+    # error_message = "\"**#{@body}**\" is an invalid command. Reply \"List commands\" to show valid commands"
+
+    # if @body == 'hello'
+    #   error_message = "https://tenor.com/view/xluna-high-five-gif-25422702"
+    # end
+    error_message = "# INVALID"
     send_message(from_user, error_message)
   end
 

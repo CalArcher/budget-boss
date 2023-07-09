@@ -26,7 +26,6 @@ class OutgoingMessageService
     http = Net::HTTP.new(uri.hostname, uri.port)
     http.use_ssl = true
     response = http.request(request)
-
   end
 end
 
@@ -48,6 +47,7 @@ end
 # request["Content-Type"] = "application/json"
 # request.body = JSON.dump({
 #   "recipient_id" => user_id
+
 # })
 
 # http = Net::HTTP.new(uri.hostname, uri.port)

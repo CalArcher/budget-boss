@@ -40,7 +40,7 @@ module Commands
 
     def notify_validation_error
       if !reasonable_payday?
-        error_message = "Paydays must be greater than #{ENV['MIN_PAYDAY']} and less than #{ENV['MAX_PAYDAY']}"
+        error_message = "Paydays must be **greater** than #{ENV['MIN_PAYDAY']} and **less** than #{ENV['MAX_PAYDAY']}"
         send_message(@to_user, error_message)
       else
         invalid_command(@to_user, @command)
@@ -64,6 +64,5 @@ module Commands
     def process_payday
       UpdateSheetService.new(to_user: @to_user, amount: payday_amount).payday
     end
- 
   end
 end

@@ -71,7 +71,7 @@ module Commands
       user_spent = sheet[user_spent_column]
       user_budget = sheet[user_budget_column]
 
-      reply = "Remaining budget for #{user.name.capitalize} this month: $#{user_budget}. Total spent this month: $#{user_spent}."
+      reply = "Remaining budget for **#{user.name.capitalize}** this month: $#{user_budget}. Total spent this month: $#{user_spent}."
       send_message(@to_user, reply)
     end
 

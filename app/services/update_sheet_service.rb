@@ -41,7 +41,7 @@ class UpdateSheetService
     over_budget = remaining_budget <= 0
 
     if over_budget
-      warning_message = "#{command_user_name} is over budget by $#{remaining_budget}!"
+      warning_message = "**#{command_user_name}** is over budget by **$#{remaining_budget}!**"
     end
   end
 
@@ -56,7 +56,7 @@ class UpdateSheetService
     add_to_sheet_column_value(column_spent, @amount)
     
     new_transaction(user_table_prefix, 'spend', @amount)
-    reply = "Success, #{command_user_name} added a spend transaction for $#{@amount} during #{current_month}/#{current_year}."
+    reply = "**Success**, #{command_user_name} added a spend transaction for $#{@amount} during #{current_month}/#{current_year}."
     send_message(@to_user, reply)
   end
 
@@ -64,7 +64,7 @@ class UpdateSheetService
     add_to_sheet_column_value('saved', @amount)
     new_transaction(user_table_prefix, 'save', @amount)
     # TODO only send if transaction success
-    reply = "Success, #{command_user_name} added a save transaction for $#{@amount} during #{current_month}/#{current_year}."
+    reply = "**Success**, #{command_user_name} added a save transaction for $#{@amount} during #{current_month}/#{current_year}."
     send_message(@to_user, reply)
   end
 
@@ -74,7 +74,7 @@ class UpdateSheetService
       new_column_value = sheet[column_name] + tx_amount
       sheet.update!(column_name => new_column_value)
     rescue StandardError => e
-      error_message = "Failed to log spend. Error: #{e.message}"
+      error_message = "**Failed** to log spend. Error: #{e.message}"
       send_message(@to_user, error_message)
     end
   end
@@ -88,7 +88,7 @@ class UpdateSheetService
     if target_sheet.payday_count > 3
       target_sheet = find_next_month_sheet
       if current_day < 27
-        message = "This is the 5th payday entered this month. Your " \
+        message = "This is the 5th payday entered this month.\nYour " \
           "paycheck was added to next month's (#{next_month}/#{year_of_next_month}) income."
         send_message(@to_user, message)
       end

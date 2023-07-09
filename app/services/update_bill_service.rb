@@ -13,7 +13,7 @@ class UpdateBillService
         bill_name: @bill_name,
         bill_amount: @amount,
       )
-      message = "Created new bill '#{@bill_name}' at $#{@amount} per month"
+      message = "Created new bill **#{@bill_name}** at $#{@amount} per month"
       send_message(@to_user, message)
     rescue StandardError => e
       error_message = "Failed to update bill. Error: #{e.message}"
@@ -28,7 +28,7 @@ class UpdateBillService
       bill.update!(
         bill_amount: @amount,
       )
-      message = "Bill '#{@bill_name}' updated from $#{previous_amount} to $#{@amount} per month"
+      message = "Bill **#{@bill_name}** updated from $#{previous_amount} to $#{@amount} per month"
       send_message(@to_user, message)
     rescue StandardError => e
       error_message = "Failed up update bill. Error: #{e.message}"
