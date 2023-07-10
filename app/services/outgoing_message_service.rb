@@ -13,7 +13,7 @@ class OutgoingMessageService
     user_id = @to_user.discord_userid
     message_content = @body
 
-    channel_id = ENV['CHANNEL_ID']
+    channel_id = @to_user.channel_id
 
     uri = URI.parse("https://discord.com/api/v9/channels/#{channel_id}/messages")
     request = Net::HTTP::Post.new(uri)

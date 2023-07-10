@@ -54,7 +54,7 @@ module Commands
       if command_user.nil?
         error_message = "**#{split_command[0]}** is not a recognized user."
         send_message(@to_user, error_message)
-      elsif transaction_amount <= 0
+      elsif transaction_amount <= 0 && numeric?(clean_amount)
         error_message = "**Failed** to log spend. Amount must be greater than 0."
         send_message(@to_user, error_message)
       elsif !is_reasonable_tx_amount?(transaction_amount)
@@ -80,7 +80,6 @@ module Commands
     private
 
     def create_user_spend_transaction(to_user, amount, command_user)
-      puts('ln 83')
       UpdateSheetService.new(to_user: to_user, amount: amount, command_user: command_user).user_transaction_spend
     end
  
