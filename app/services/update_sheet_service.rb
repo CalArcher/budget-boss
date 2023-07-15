@@ -109,7 +109,7 @@ class UpdateSheetService
       send_message(@to_user, error_message)
       return
     end
-    message = "Balance updated, the total for #{target_sheet.month}/#{target_sheet.year} is now #{updated_income}. " \
+    message = "Balance updated, the total for #{target_sheet.month}/#{target_sheet.year} is now **$#{updated_income}**. " \
       "#{updated_payday_count} paydays have been logged this month."
     send_message(@to_user, message)
   end
