@@ -29,9 +29,6 @@ class OutgoingMessageService
   end
 end
 
-
-
-
 # keep for later implementation if needed.
 # current setup only works if you already have a DM channel open with user
 # which is fine for my use
