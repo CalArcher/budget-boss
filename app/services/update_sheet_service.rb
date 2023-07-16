@@ -96,7 +96,7 @@ class UpdateSheetService
     
     updated_income = target_sheet.payday_sum + @amount
     updated_payday_count = target_sheet.payday_count + 1
-    transaction_name = "#{user_table_prefix} payday"
+    transaction_name = "#{@to_user.name} payday"
 
     begin
       target_sheet.update!(
