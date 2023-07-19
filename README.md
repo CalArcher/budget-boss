@@ -40,6 +40,7 @@ Originally using Twilio, Budget Boss now runs on Discord to lower operating cost
 - Reversing a transaction (undo)
 - Listing a users recent transactions
 - Add yearly bills
+- Add description for spend and save transactions to allow for better tracking of expenses and to help remember what transactions were for.
 
 ---
 <br/>
