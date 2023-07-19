@@ -45,4 +45,4 @@ Originally using Twilio, Budget Boss now runs on Discord to lower operating cost
 <br/>
 <br/>
 
-<img src="demo.gif" width="396" height="858">
+<img src="demo.gif" width="257" height="558">
