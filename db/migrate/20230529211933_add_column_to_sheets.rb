@@ -13,7 +13,5 @@ class AddColumnToSheets < ActiveRecord::Migration[7.0]
     change_column :bills, :bill_amount, :float, precision: 10, scale: 2
 
     change_column :transactions, :tx_amount, :float, precision: 10, scale: 2
-
-    remove_column :transactions, :tx_currency
   end
 end

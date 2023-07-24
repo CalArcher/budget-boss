@@ -1,13 +1,17 @@
 module Commands
   class UserSpentCommand < BaseCommand
     def initialize(command:, to_user:)
-      # format for this command to be valid = "#{user_name} spent #{amount}"
+      # format for this command to be valid = "#{user_name} spent #{amount} "${description}""
       @command = command
       @to_user = to_user
     end
 
     def self.command_key
       'spent'
+    end
+
+    def length_minus_description
+      @command.gsub(/".*?"/, '').split(' ').length
     end
 
     def command_user
@@ -23,11 +27,34 @@ module Commands
     end
 
     def correct_length?
-      split_command.length == 3
+      length_minus_description == 3
+    end
+
+    # finds text between first set of double quotes
+    def parsed_description
+      @_parsed_description ||= begin
+        description = ''
+        quote_count = 0
+        @command.chars.each do |letter|
+          if letter == '"' 
+            quote_count += 1
+          end
+
+          if quote_count.between?(1, 2)
+            description << letter
+          end
+        end
+
+        quote_count == 2 ? description[1..-2] : nil
+      end
+    end
+
+    def valid_and_present_description
+      @_parsed_description&.length&.between?(1, 40)
     end
 
     def clean_amount
-      @_clean_amount ||= strip_leading_dollars(split_command.last)
+      @_clean_amount ||= strip_leading_dollars(split_command[2])
     end
 
     def transaction_amount
@@ -60,6 +87,10 @@ module Commands
       elsif !is_reasonable_tx_amount?(transaction_amount)
         error_message = "**Oops!** $#{transaction_amount} seems a bit high."
         send_message(@to_user, error_message)
+      elsif valid_and_present_description.nil?
+        error_message = "**Invalid description**. Description must be between double " \
+          "quotes and less than 40 characters."
+        send_message(@to_user, error_message)
       else
         invalid_command(@to_user, @command)
       end
@@ -79,6 +110,7 @@ module Commands
 
     private
 
+    # TODO: Add description to tx
     def create_user_spend_transaction(to_user, amount, command_user)
       UpdateSheetService.new(to_user: to_user, amount: amount, command_user: command_user).user_transaction_spend
     end

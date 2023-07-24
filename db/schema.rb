@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_09_235146) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_23_231117) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "bills", force: :cascade do |t|
     t.string "bill_name", null: false
-    t.float "bill_amount", null: false
+    t.decimal "bill_amount", precision: 9, scale: 2, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -24,21 +24,22 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_09_235146) do
   create_table "sheets", force: :cascade do |t|
     t.integer "month", null: false
     t.integer "year", null: false
-    t.float "income", null: false
-    t.float "bill_totals", null: false
+    t.decimal "income", precision: 9, scale: 2, null: false
+    t.decimal "bill_totals", precision: 9, scale: 2, null: false
     t.float "total_spent"
-    t.float "user_3_budget"
-    t.float "user_1_budget"
-    t.float "user_1_spent"
-    t.float "user_2_budget"
-    t.float "user_2_spent"
+    t.integer "together_budger"
+    t.decimal "user_1_budget", precision: 9, scale: 2
+    t.decimal "user_1_spent", precision: 9, scale: 2
+    t.decimal "user_2_budget", precision: 9, scale: 2
+    t.decimal "user_2_spent", precision: 9, scale: 2
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "payday_count"
-    t.decimal "user_3_spent"
+    t.decimal "user_3_spent", precision: 9, scale: 2
+    t.decimal "user_3_budget", precision: 9, scale: 2
     t.integer "monthly_service"
-    t.float "saved", default: 0.0
-    t.float "payday_sum"
+    t.decimal "saved", precision: 9, scale: 2, default: "0.0"
+    t.decimal "payday_sum", precision: 9, scale: 2
   end
 
   create_table "text_recieves", force: :cascade do |t|
@@ -53,25 +54,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_09_235146) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "texts", force: :cascade do |t|
-    t.string "body"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "transactions", force: :cascade do |t|
     t.string "tx_name", null: false
-    t.string "tx_type", null: false
-    t.float "tx_amount", null: false
+    t.integer "tx_type", null: false
+    t.decimal "tx_amount", precision: 9, scale: 2, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-  end
-
-  create_table "user_commands", force: :cascade do |t|
-    t.string "body"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string "tx_currency", null: false
+    t.string "tx_description"
   end
 
   create_table "users", force: :cascade do |t|
