@@ -32,25 +32,21 @@ module Commands
 
     # finds text between first set of double quotes
     def parsed_description
-      @_parsed_description ||= begin
         description = ''
         quote_count = 0
         @command.chars.each do |letter|
           if letter == '"' 
             quote_count += 1
           end
-
           if quote_count.between?(1, 2)
             description << letter
           end
         end
-
         quote_count == 2 ? description[1..-2] : nil
-      end
     end
 
     def valid_and_present_description
-      @_parsed_description&.length&.between?(1, 40)
+      parsed_description&.length&.between?(1, 40)
     end
 
     def clean_amount
@@ -73,6 +69,7 @@ module Commands
         command_user.present?,
         numeric?(clean_amount),
         valid_tx_amount?,
+        valid_and_present_description,
       ].all?
     end
 
@@ -105,14 +102,20 @@ module Commands
     end
 
     def execute
-      create_user_spend_transaction(@to_user, transaction_amount, command_user)
+      create_user_spend_transaction(@to_user, transaction_amount, command_user, parsed_description)
     end
 
     private
 
     # TODO: Add description to tx
-    def create_user_spend_transaction(to_user, amount, command_user)
-      UpdateSheetService.new(to_user: to_user, amount: amount, command_user: command_user).user_transaction_spend
+    def create_user_spend_transaction(to_user, amount, command_user, description)
+      puts description
+      UpdateSheetService.new(
+        to_user: to_user,
+        amount: amount,
+        command_user: command_user,
+        description: description
+        ).user_transaction_spend
     end
  
   end

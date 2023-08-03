@@ -25,8 +25,7 @@ class EndOfMonthService
   end
 
   def report_users
-    ::User.where(id: 2)
-    # ::User.where(send_report: 1)
+    ::User.where(send_report: 1)
   end
 
   def send_report(to_user, last_month_sheet, new_month_sheet)

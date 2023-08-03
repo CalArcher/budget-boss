@@ -3,10 +3,11 @@ class UpdateSheetService
   include TimeHelper
   include SmsHelper
 
-  def initialize(to_user:, amount:, command_user: nil)
+  def initialize(to_user:, amount:, command_user: nil, description:)
     @to_user = to_user
     @amount = amount
     @command_user = command_user
+    @description = description
   end
 
   def user_table_prefix
@@ -25,11 +26,13 @@ class UpdateSheetService
     Sheet.find_or_create_sheet(next_month, year_of_next_month)
   end
 
-  def new_transaction(name, type, amount)
+  def new_transaction(name: nil, type:, amount:, description:)
+    puts(description)
     Transaction.create!(
       tx_name: name,
       tx_type: type,
       tx_amount: amount,
+      tx_description: description,
       user_id: @to_user.id,
     )
   end
@@ -55,14 +58,14 @@ class UpdateSheetService
     add_to_sheet_column_value(column_budget, -@amount)
     add_to_sheet_column_value(column_spent, @amount)
     
-    new_transaction(user_table_prefix, 'spend', @amount)
+    new_transaction(name: user_table_prefix, type: 'spend', amount: @amount, description: @description)
     reply = "**Success**, #{command_user_name} added a spend transaction for $#{@amount} during #{current_month}/#{current_year}."
     send_message(@to_user, reply)
   end
 
   def user_transaction_save
     add_to_sheet_column_value('saved', @amount)
-    new_transaction(user_table_prefix, 'save', @amount)
+    new_transaction(name: user_table_prefix, type: 'save', amount: @amount, description: @description)
     # TODO only send if transaction success
     reply = "**Success**, #{command_user_name} added a save transaction for $#{@amount} during #{current_month}/#{current_year}."
     send_message(@to_user, reply)
@@ -96,14 +99,14 @@ class UpdateSheetService
     
     updated_income = target_sheet.payday_sum + @amount
     updated_payday_count = target_sheet.payday_count + 1
-    transaction_name = "#{@to_user.name} payday"
+    tx_description = "#{@to_user.name} payday"
 
     begin
       target_sheet.update!(
         payday_sum: updated_income,
         payday_count: updated_payday_count,
       )
-      new_transaction(transaction_name, 'save', @amount)
+      new_transaction(type: 'save', amount: @amount, description: tx_description)
     rescue StandardError => e
       error_message = "Failed up update balance, error: #{e.message}"
       send_message(@to_user, error_message)
