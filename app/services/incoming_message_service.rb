@@ -84,7 +84,7 @@ class IncomingMessageService
     registry_entry = registered_commands.detect do |k, v|
       body_array.include?(k)
     end
-
+    
     if registry_entry
       validate_and_execute_command(registry_entry)
     else

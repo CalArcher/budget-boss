@@ -107,7 +107,6 @@ module Commands
 
     private
 
-    # TODO: Add description to tx
     def create_user_spend_transaction(to_user, amount, command_user, description)
       puts description
       UpdateSheetService.new(

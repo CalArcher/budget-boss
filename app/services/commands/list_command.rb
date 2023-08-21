@@ -1,7 +1,6 @@
 module Commands
   class ListCommand < BaseCommand
     def initialize(command:, to_user:)
-      # format for this command to be valid = "#{user_name} status"
       @command = command
       @to_user = to_user
     end
@@ -14,6 +13,7 @@ module Commands
       all_list_commands = [
         'list commands',
         'list bills',
+        'list paydays'
       ]
       all_list_commands.include?(@command.downcase)
     end
@@ -46,6 +46,8 @@ module Commands
         list_commands
       when 'list bills'
         list_bills
+      when 'list paydays'
+        list_paydays
       end
     end
 
@@ -64,6 +66,21 @@ module Commands
         'list bills',
       ]
     end
+
+    def list_paydays
+      sheet = Sheet.find_or_create_sheet(current_month, current_year)
+      paydays = sheet&.payday_count 
+      total = sheet&.payday_sum
+
+      count_text =  case paydays
+                    when 0 then 'have been no paydays'
+                    when 1 then 'has been 1 payday'
+                    else "have been #{paydays} paydays"
+                    end
+
+      reply = "There #{count_text} this month totalling $#{total}."
+      send_message(@to_user, reply)
+    end
  
     def list_bills
       all_bills_formatted = ::Bill.all.order(:bill_name).map do |bill|
@@ -71,7 +88,6 @@ module Commands
       end.join(",\n")
       reply = "Here are the names of your bills and their amounts:\n\n#{all_bills_formatted}."
       send_message(@to_user, reply)
-      
     end
 
     def list_commands

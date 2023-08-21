@@ -11,7 +11,7 @@ class EndOfMonthService
     new_month_sheet = Sheet.find_or_create_sheet(current_month, current_year, true)
 
     # prevent service multiple times on first day of month
-    return if new_month_sheet.monthly_service == 1 
+    return if new_month_sheet.monthly_service > 0
 
     new_month_sheet.update!(
       monthly_service: 1,
@@ -47,7 +47,7 @@ class EndOfMonthService
     message = "Hey **#{user_name}**, your end of month report is here!\n\n" \
       "- You spent $#{user_last_spent}, and have $#{user_remaining} left that will be " \
       "#{operation} your new budget.\n- This month, your budget is $#{user_new_budget}.\n" \
-      "- Together, you spent #{together_spent}, and had #{together_remaining} left over\n" \
+      "- Together, you spent $#{together_spent}, and had $#{together_remaining} left over\n" \
       "- This month, your shared budget is $#{together_new_budget}."
 
     send_message(to_user, message)

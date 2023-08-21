@@ -27,7 +27,6 @@ class UpdateSheetService
   end
 
   def new_transaction(name: nil, type:, amount:, description:)
-    puts(description)
     Transaction.create!(
       tx_name: name,
       tx_type: type,
@@ -48,7 +47,6 @@ class UpdateSheetService
     end
   end
 
-  #TODO add "remaining balance $$$"
   def user_transaction_spend
     column_budget = "#{user_table_prefix}_budget"
     column_spent = "#{user_table_prefix}_spent"
@@ -59,7 +57,10 @@ class UpdateSheetService
     add_to_sheet_column_value(column_spent, @amount)
     
     new_transaction(name: user_table_prefix, type: 'spend', amount: @amount, description: @description)
-    reply = "**Success**, #{command_user_name} added a spend transaction for $#{@amount} during #{current_month}/#{current_year}."
+
+    remaining_balance = find_current_sheet[column_budget]
+    reply = "**Success**, #{command_user_name} added a spend transaction for $#{@amount} during #{current_month}/#{current_year}.\n" \
+      "**Remaining balance**: $#{remaining_balance}."
     send_message(@to_user, reply)
   end
 
@@ -82,7 +83,7 @@ class UpdateSheetService
     end
   end
 
-  # update to handle geting paid late
+  # update to handle getting paid late
   # right now users need to ensure all 4 paydays are entered between
   # 1st and last day of the month. Not ideal.
   def payday
