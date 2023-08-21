@@ -2,7 +2,7 @@ module Commands
   class UserSpentCommand < BaseCommand
     def initialize(command:, to_user:)
       # format for this command to be valid = "#{user_name} spent #{amount} "${description}""
-      @command = command
+      @command = command.gsub(/“|”/, '"')
       @to_user = to_user
     end
 
@@ -94,6 +94,7 @@ module Commands
     end
 
     def validate
+      binding.pry
       if valid_command?
         'valid!'
       else

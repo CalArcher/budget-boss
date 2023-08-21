@@ -15,7 +15,7 @@ class IncomingMessageService
   end
 
   def body_correct_length?
-    body_array.length >= 2 && body_array.length <= 4
+    body_array.length >= 2 && body_array.length <= 40
   end
 
   def reply_invalid_command

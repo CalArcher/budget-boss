@@ -53,11 +53,14 @@ module Commands
     private
 
     def send_last_x_transactions
-      requested_number = split_command[1]
+      requested_number = split_command[1]&.to_i
+      max_num = [35, requested_number].min
+
       last_x = ::Transaction.where(tx_type: 'spend').order(created_at: :desc).limit(requested_number)
 
       formatted_transactions = last_x.map do |tx|
-        "- **#{tx.created_at.day}/#{tx.created_at.month}:** spent $#{tx.tx_amount} on \"#{tx.tx_description}\""
+        tx_user_name = ::User.find_by(key: tx.tx_name)&.name&.capitalize
+        "- **#{tx.created_at.day}/#{tx.created_at.month}:** #{tx_user_name} spent $#{tx.tx_amount} on \"#{tx.tx_description}\""
       end.join("\n")
 
       reply = "**The last #{requested_number} transactions are:**\n#{formatted_transactions}"
