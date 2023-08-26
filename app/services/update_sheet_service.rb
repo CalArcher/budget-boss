@@ -26,7 +26,7 @@ class UpdateSheetService
     Sheet.find_or_create_sheet(next_month, year_of_next_month)
   end
 
-  def new_transaction(name: nil, type:, amount:, description:)
+  def new_transaction(name: 'payday', name:, type:, amount:, description:)
     Transaction.create!(
       tx_name: name,
       tx_type: type,
@@ -56,7 +56,7 @@ class UpdateSheetService
     add_to_sheet_column_value(column_budget, -@amount)
     add_to_sheet_column_value(column_spent, @amount)
     
-    new_transaction(name: user_table_prefix, type: 'spend', amount: @amount, description: @description)
+    new_transaction(name: 'payday', name: user_table_prefix, type: 'spend', amount: @amount, description: @description)
 
     remaining_balance = find_current_sheet[column_budget]
     reply = "**Success**, #{command_user_name} added a spend transaction for $#{@amount} during #{current_month}/#{current_year}.\n" \
@@ -66,7 +66,7 @@ class UpdateSheetService
 
   def user_transaction_save
     add_to_sheet_column_value('saved', @amount)
-    new_transaction(name: user_table_prefix, type: 'save', amount: @amount, description: @description)
+    new_transaction(name: 'payday', name: user_table_prefix, type: 'save', amount: @amount, description: @description)
     # TODO only send if transaction success
     reply = "**Success**, #{command_user_name} added a save transaction for $#{@amount} during #{current_month}/#{current_year}."
     send_message(@to_user, reply)
@@ -100,14 +100,13 @@ class UpdateSheetService
     
     updated_income = target_sheet.payday_sum + @amount
     updated_payday_count = target_sheet.payday_count + 1
-    tx_description = "#{@to_user.name} payday"
 
     begin
       target_sheet.update!(
         payday_sum: updated_income,
         payday_count: updated_payday_count,
       )
-      new_transaction(type: 'save', amount: @amount, description: tx_description)
+      new_transaction(name: 'payday', type: 'save', amount: @amount, description: @description)
     rescue StandardError => e
       error_message = "Failed up update balance, error: #{e.message}"
       send_message(@to_user, error_message)
