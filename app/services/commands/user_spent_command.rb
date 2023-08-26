@@ -94,7 +94,6 @@ module Commands
     end
 
     def validate
-      binding.pry
       if valid_command?
         'valid!'
       else

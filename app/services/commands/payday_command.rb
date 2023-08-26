@@ -62,7 +62,7 @@ module Commands
     private
 
     def process_payday
-      UpdateSheetService.new(to_user: @to_user, amount: payday_amount).payday
+      UpdateSheetService.new(to_user: @to_user, amount: payday_amount, description: nil).payday
     end
   end
 end
