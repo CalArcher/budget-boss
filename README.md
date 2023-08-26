@@ -17,10 +17,12 @@ Originally using Twilio, Budget Boss now runs on Discord to lower operating cost
 - `create bill (new_bill_name) (amount)` --> creates a new monthly bill 
 - `(user name) status` --> returns a user's remaining monthly budget and how much they spent
 - `payday (amount)` --> log a payday
-- `(user name) spent (amount)` --> log a spent transaction
-- `(user name) saved (amount)` --> track money earned not from a payday
+- `(user name) spent (amount) "(description in quotes)"` --> log a spent transaction
+- `(user name) saved (amount) "(description in quotes)"` --> track money earned not from a payday
 - `list commands` --> list all available commands
 - `list bills` --> list all bills
+- `list paydays` --> gives info on how many paydays this month have been logged
+- `previous (number) transactions` --> list last x number of transactions
 
 
 ## Technologies Used
@@ -38,9 +40,7 @@ Originally using Twilio, Budget Boss now runs on Discord to lower operating cost
 - Expand available commands to add more functionality like serving a user historical data
 - Better error handling
 - Reversing a transaction (undo)
-- Listing a users recent transactions
 - Add yearly bills
-- Add description for spend and save transactions to allow for better tracking of expenses and to help remember what transactions were for.
 
 ---
 <br/>
