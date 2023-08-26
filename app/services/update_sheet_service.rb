@@ -26,7 +26,7 @@ class UpdateSheetService
     Sheet.find_or_create_sheet(next_month, year_of_next_month)
   end
 
-  def new_transaction(name: 'payday', name:, type:, amount:, description:)
+  def new_transaction(name:, type:, amount:, description:)
     Transaction.create!(
       tx_name: name,
       tx_type: type,
