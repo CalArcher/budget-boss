@@ -11,7 +11,7 @@ class EndOfMonthService
     new_month_sheet = Sheet.find_or_create_sheet(current_month, current_year, true)
 
     # prevent service multiple times on first day of month
-    return if new_month_sheet.monthly_service > 0
+    return if new_month_sheet.monthly_service.present?
 
     new_month_sheet.update!(
       monthly_service: 1,
@@ -25,7 +25,7 @@ class EndOfMonthService
   end
 
   def report_users
-    ::User.where(send_report: 1)
+    User.where(send_report: 1)
   end
 
   def send_report(to_user, last_month_sheet, new_month_sheet)
