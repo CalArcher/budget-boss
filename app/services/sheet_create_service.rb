@@ -9,9 +9,8 @@ class SheetCreateService
   end
 
   def find_or_create
-    existing_sheet = Sheet.find_by(month: @month, year: @year)
-    existing_sheet || begin 
-      new_sheet = Sheet.create!(
+    found_sheet = Sheet.find_by(month: @month, year: @year)
+    found_sheet ||= Sheet.create!(
         month: @month,
         year: @year,
         payday_sum: 0,
@@ -22,12 +21,11 @@ class SheetCreateService
         user_3_spent: 0,
         payday_count: 0,
         saved: 0,
-      )
-      if @set_starting_values == true
-        set_starting_values(new_sheet)
-      end
-      new_sheet
+    )
+    if @set_starting_values == true
+      set_starting_values(found_sheet)
     end
+    found_sheet
   end
 
   def last_month_valid_sheet
@@ -48,7 +46,6 @@ class SheetCreateService
 
   def set_starting_values(sheet)
     last_sheet = last_month_valid_sheet
-    
     starting_income = new_starting_income.to_f
     bill_totals = Bill.bill_totals
     savings_amount = ENV['MONTHLY_SAVINGS'].to_f

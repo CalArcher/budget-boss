@@ -108,7 +108,6 @@ module Commands
     private
 
     def create_user_spend_transaction(to_user, amount, command_user, description)
-      puts description
       UpdateSheetService.new(
         to_user: to_user,
         amount: amount,
