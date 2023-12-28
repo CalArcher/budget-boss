@@ -58,12 +58,14 @@ module Commands
         'cal status',
         'sabrina status',
         'together status',
+        'all status',
         'payday (amount)',
         'cal spent (amount)',
         'sabrina spent (amount)',
         'together spent (amount)',
         'list commands',
         'list bills',
+        'previous (number) transactions'
       ]
     end
 
