@@ -23,11 +23,15 @@ module Commands
     end
 
     def clean_amount
-      @_clean_amount ||= strip_leading_dollars(split_command.last)
+      @_clean_amount ||= strip_leading_dollars(split_command[3])
     end
 
     def correct_length?
-      split_command.length == 4
+      if command_type == 'delete'
+        split_command.length == 3
+      else
+        split_command.length == 4
+      end
     end
 
     def all_bill_names
@@ -40,7 +44,8 @@ module Commands
 
     def correct_command_type?
       (all_bill_names.include?(bill_name) && command_type == 'update') ||
-        (!all_bill_names.include?(bill_name) && command_type == 'create')
+        (!all_bill_names.include?(bill_name) && command_type == 'create') ||
+        (all_bill_names.include?(bill_name) && command_type == 'delete')
     end
 
     def registered_commands
@@ -52,7 +57,15 @@ module Commands
     end
 
     def valid_bill_amount?
-      bill_amount > 0
+      if command_type == 'delete'
+        bill_amount.nil?
+      else
+        bill_amount > 0 && numeric?(clean_amount)
+      end
+    end
+
+    def bill_correct_location?
+      split_command[1] == 'bill'
     end
 
     def valid_command?
@@ -61,7 +74,7 @@ module Commands
         correct_command_type?,
         valid_bill_amount?,
         !bill_protected_name?,
-        numeric?(clean_amount),
+        bill_correct_location?,
       ].all?
     end
 
@@ -71,7 +84,7 @@ module Commands
         error_message = "**#{bill_name.capitalize}** is a protected word. Please choose " \
           "a different name for your new bill"
         send_message(@to_user, error_message)
-      elsif !correct_command_type? && command_type == 'update'
+      elsif !correct_command_type? && (command_type == 'update' || command_type == 'delete')
         error_message = "**#{bill_name.capitalize}** does not exist"
         send_message(@to_user, error_message)
       elsif !correct_command_type? && command_type == 'create'
@@ -91,10 +104,22 @@ module Commands
     end
 
     def execute
-      create_update_bill(name: bill_name, amount: bill_amount)
+      case command_type
+      when 'delete'
+        destroy_bill
+      when 'update', 'create'
+        create_update_bill(name: bill_name, amount: bill_amount)
+      end
     end
 
     private
+
+    def destroy_bill
+      found_bill = Bill.find_by(bill_name: bill_name)
+      found_bill.destroy!
+      reply = "**#{found_bill.bill_name}** has been deleted"
+      send_message(@to_user, reply)
+    end
 
     def create_update_bill(name:, amount:)
       bill_service = UpdateBillService.new(to_user: @to_user, amount: amount, bill_name: name)

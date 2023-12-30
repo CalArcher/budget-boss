@@ -30,6 +30,7 @@ module Commands
     # because regex is boring :) recursively remove only leading $
     # better performance than .sub(/\A\$+/, "")
     def strip_leading_dollars(str)
+      return if str.blank?
       if str[0] == '$'
         n_str = str.slice(1..-1)
         strip_leading_dollars(n_str)
