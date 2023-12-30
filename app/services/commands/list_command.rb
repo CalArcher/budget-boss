@@ -71,7 +71,7 @@ module Commands
 
     def list_paydays
       sheet = Sheet.find_or_create_sheet(current_month, current_year)
-      paydays = sheet&.payday_count 
+      paydays = sheet&.payday_count
       total = sheet&.payday_sum
 
       count_text =  case paydays
@@ -80,15 +80,27 @@ module Commands
                     else "have been #{paydays} paydays"
                     end
 
-      reply = "There #{count_text} this month totalling $#{total}."
+      begin_range = Date.new(current_year, current_month, 1)
+      end_range = Date.new(current_year, current_month, -1)
+      each_payday_text = "\n\n**Paydays so far**:"
+      Transaction.where(created_at: begin_range..end_range, tx_name: 'payday').each do |payday|
+        from_person = User.find(payday.user_id).name.capitalize
+        amount = payday.tx_amount.to_f
+        date = "#{payday.created_at.month}-#{payday.created_at.day}-#{payday.created_at.year}"
+        each_payday_text += "\n- **#{from_person}**: $#{amount} on #{date}"
+      end
+      reply = "There #{count_text} this month totalling $#{total}. #{each_payday_text if paydays > 0}"
       send_message(@to_user, reply)
+  
     end
  
     def list_bills
       all_bills_formatted = ::Bill.all.order(:bill_name).map do |bill|
         "- #{bill.bill_name}: $#{bill.bill_amount}/month"
       end.join(",\n")
-      reply = "Here are the names of your bills and their amounts:\n\n#{all_bills_formatted}."
+
+      reply = "Here are the names of your bills and their amounts:\n\n#{all_bills_formatted}." \
+        "\n\n **Bills total**: $#{Bill.bill_totals}."
       send_message(@to_user, reply)
     end
 
