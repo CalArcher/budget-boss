@@ -14,7 +14,8 @@ Originally using Twilio, Budget Boss now runs on Discord to lower operating cost
 
 **Current commands available:**
 - `update bill (bill_name) (amount)`  --> update a bill to a new monthly amount
-- `create bill (new_bill_name) (amount)` --> creates a new monthly bill 
+- `create bill (new_bill_name) (amount)` --> creates a new monthly bill
+- `delete bill (bill_name)` --> deletes an existing monthly bill 
 - `(user name) status` --> returns a user's remaining monthly budget and how much they spent
 - `payday (amount)` --> log a payday
 - `(user name) spent (amount) "(description in quotes)"` --> log a spent transaction
@@ -35,12 +36,14 @@ Originally using Twilio, Budget Boss now runs on Discord to lower operating cost
 
 ## TODO Features:
 
-- Delete/remove bills
 - Specify which month a payday is for instead of defaulting to the current month (paid late, paid early)
 - Expand available commands to add more functionality like serving a user historical data
 - Better error handling
 - Reversing a transaction (undo)
 - Add yearly bills
+- create bill categories (i.e groceries, medical expenses, pets, etc)
+- last x transactions (not prev)
+- list categories
 
 ---
 <br/>

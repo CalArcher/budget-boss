@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_23_231117) do
+ActiveRecord::Schema[7.0].define(version: 2023_12_31_212632) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -19,6 +19,25 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_23_231117) do
     t.decimal "bill_amount", precision: 9, scale: 2, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "categories", force: :cascade do |t|
+    t.string "name"
+    t.decimal "budget"
+    t.decimal "spent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "month_stats", force: :cascade do |t|
+    t.integer "month"
+    t.integer "year"
+    t.decimal "total_spent"
+    t.decimal "total_saved"
+    t.decimal "remaining_budget"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["year", "month"], name: "index_month_stats_on_year_and_month"
   end
 
   create_table "sheets", force: :cascade do |t|
@@ -40,6 +59,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_23_231117) do
     t.integer "monthly_service"
     t.decimal "saved", precision: 9, scale: 2, default: "0.0"
     t.decimal "payday_sum", precision: 9, scale: 2
+    t.index ["year", "month"], name: "index_sheets_on_year_and_month"
   end
 
   create_table "text_recieves", force: :cascade do |t|
