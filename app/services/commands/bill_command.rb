@@ -129,6 +129,6 @@ module Commands
         bill_service.update_bill
       end
     end
- 
+
   end
 end

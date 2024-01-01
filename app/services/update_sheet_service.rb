@@ -56,7 +56,7 @@ class UpdateSheetService
     add_to_sheet_column_value(column_budget, -@amount)
     add_to_sheet_column_value(column_spent, @amount)
     
-    new_transaction(name: 'payday', name: user_table_prefix, type: 'spend', amount: @amount, description: @description)
+    new_transaction(name: user_table_prefix, type: 'spend', amount: @amount, description: @description)
 
     remaining_balance = find_current_sheet[column_budget]
     reply = "**Success**, #{command_user_name} added a spend transaction for $#{@amount} during #{current_month}/#{current_year}.\n" \
@@ -66,7 +66,7 @@ class UpdateSheetService
 
   def user_transaction_save
     add_to_sheet_column_value('saved', @amount)
-    new_transaction(name: 'payday', name: user_table_prefix, type: 'save', amount: @amount, description: @description)
+    new_transaction(name: user_table_prefix, type: 'save', amount: @amount, description: @description)
     # TODO only send if transaction success
     reply = "**Success**, #{command_user_name} added a save transaction for $#{@amount} during #{current_month}/#{current_year}."
     send_message(@to_user, reply)

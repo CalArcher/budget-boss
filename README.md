@@ -44,6 +44,7 @@ Originally using Twilio, Budget Boss now runs on Discord to lower operating cost
 - create bill categories (i.e groceries, medical expenses, pets, etc)
 - last x transactions (not prev)
 - list categories
+- create, update, delete categories
 
 ---
 <br/>

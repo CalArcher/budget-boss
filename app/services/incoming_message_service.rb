@@ -11,11 +11,11 @@ class IncomingMessageService
   end
 
   def body_array
-    @_body_array ||= @body.split(' ')
+    @_body_array ||= @body.gsub(/".*?"/, '').split(' ')
   end
 
   def body_correct_length?
-    body_array.length >= 2 && body_array.length <= 40
+    body_array.length > 1 && body_array.length < 5
   end
 
   def reply_invalid_command
@@ -40,10 +40,12 @@ class IncomingMessageService
     [
       'update bill (bill_name) (amount)',
       'create bill (new_bill_name) (amount)',
+      'delete bill (bill_name)',
 
       'cal status',
       'sabrina status',
       'together status',
+      'all status',
 
       'payday (amount)',
 
